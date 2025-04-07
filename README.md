@@ -31,7 +31,7 @@ gradlew shadowJar
 After building the project, run the application in the console:  
 
 ```sh
-java -jar build/libs/library3000app.jar
+java -jar build/libs/Library3000-1.0-SNAPSHOT.jar
 ```
 
 📌 **Note:** If the `books.csv` file does not exist, the application will automatically create it in the `src/main/resources` folder with some sample books.  
