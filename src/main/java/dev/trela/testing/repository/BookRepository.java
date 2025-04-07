@@ -70,7 +70,7 @@ public class BookRepository {
     public boolean addBook(Book book) {
         List<Book> books = getAllBooks(); // Retrieve the current list of books
 
-        boolean isAnyFieldEmpty = book.getAuthor().equals("") || book.getDescription().equals("") || book.getDescription().equals("");
+        boolean isAnyFieldEmpty = book.getAuthor().equals("") || book.getDescription().equals("") || book.getTitle().equals("");
 
         if(isAnyFieldEmpty) return false;
 
@@ -115,7 +115,7 @@ public class BookRepository {
      */
     public void updateBook(Book updatedBook) {
 
-        boolean isAnyFieldEmpty = updatedBook.getAuthor().equals("") ||  updatedBook.getDescription().equals("") || updatedBook.getDescription().equals("");
+        boolean isAnyFieldEmpty = updatedBook.getAuthor().equals("") ||  updatedBook.getDescription().equals("") || updatedBook.getTitle().equals("");
 
         if (isAnyFieldEmpty){
             throw new IllegalArgumentException("Failed to update the book: All fields must be filled.");
