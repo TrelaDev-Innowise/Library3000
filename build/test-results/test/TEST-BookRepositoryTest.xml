@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="BookRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-04-07T07:22:18" hostname="DESKTOP-GJ1VFKN" time="0.537">
+  <properties/>
+  <testcase name="testSaveAllBooks()" classname="BookRepositoryTest" time="0.495"/>
+  <testcase name="testAddBook()" classname="BookRepositoryTest" time="0.014"/>
+  <testcase name="testGetAllBooks()" classname="BookRepositoryTest" time="0.005"/>
+  <testcase name="testUpdateBook()" classname="BookRepositoryTest" time="0.009"/>
+  <testcase name="testDeleteBook()" classname="BookRepositoryTest" time="0.008"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -17,6 +17,9 @@ dependencies {
     implementation("org.springframework:spring-context:6.2.3")
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-csv
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.18.2")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    implementation("org.springframework.boot:spring-boot-starter-aop:3.4.3")
+    testImplementation("org.springframework:spring-test:6.2.3")
 
 
 

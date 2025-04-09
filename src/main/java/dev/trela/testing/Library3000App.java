@@ -1,114 +1,114 @@
 package dev.trela.testing;
 
 import dev.trela.testing.config.LibraryConfig;
+import dev.trela.testing.learning.Calculator;
 import dev.trela.testing.model.Book;
-import dev.trela.testing.repository.BookRepository;
 import dev.trela.testing.service.BookService;
+import dev.trela.testing.service.MessageService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 
 public class Library3000App {
     public static void main(String[] args) {
+
+        // Inicjalizacja kontekstu aplikacji Spring
         ApplicationContext context = new AnnotationConfigApplicationContext(LibraryConfig.class);
         BookService bookService = context.getBean(BookService.class);
+        MessageService messageService = context.getBean(MessageService.class);
         Scanner scanner = new Scanner(System.in);
 
-        while (true) {
-            System.out.println("\nChoose an option:");
-            System.out.println("1 - Display book list");
-            System.out.println("2 - Create a new book");
-            System.out.println("3 - Edit a book");
-            System.out.println("4 - Delete a book");
-            System.out.println("5 - Search by keyword");
-            System.out.println("6 - Exit");
+        System.out.println(messageService.getMessage("language.selection"));
+        int languageChoice = scanner.nextInt();
+        if (languageChoice == 2) {
+            messageService.setLocale(Locale.forLanguageTag("pl")); // Ustawienie języka na Polski
+        }
 
-            System.out.print("Your choice: ");
+        while (true) {
+
+            System.out.println("\n" + messageService.getMessage("menu.title"));
+            System.out.println(messageService.getMessage("menu.option1"));
+            System.out.println(messageService.getMessage("menu.option2"));
+            System.out.println(messageService.getMessage("menu.option3"));
+            System.out.println(messageService.getMessage("menu.option4"));
+            System.out.println(messageService.getMessage("menu.option5"));
+            System.out.println(messageService.getMessage("menu.option6"));
+
+            System.out.print(messageService.getMessage("menu.choice"));
 
             try {
                 int choice = scanner.nextInt();
-                scanner.nextLine(); // Clear Enter
+                scanner.nextLine();
 
                 switch (choice) {
                     case 1 -> {
-                        System.out.println("\nBook List:");
-                        bookService.getAllBooks().forEach(book -> System.out.println(book));
+                        System.out.println("\n" + messageService.getMessage("book.list"));
+                        bookService.printLocalizedBooks(bookService.getAllBooks());
                     }
                     case 2 -> {
-                        System.out.print("Enter title: ");
+                        System.out.print(messageService.getMessage("book.add.title"));
                         String title = scanner.nextLine();
-                        System.out.print("Enter author: ");
+                        System.out.print(messageService.getMessage("book.add.author"));
                         String author = scanner.nextLine();
-                        System.out.print("Enter description: ");
+                        System.out.print(messageService.getMessage("book.add.description"));
                         String description = scanner.nextLine();
 
-                        boolean isBookAdded = bookService.addBook(new Book(-1, title, author, description));
-                        if(isBookAdded)
-                        System.out.println("Book added!");
-                        else {
-                            System.out.println("Failed to add the book. Make sure all fields are not empty.");
+                        try {
+                            bookService.addBook(new Book(-1, title, author, description));
+                            System.out.println(messageService.getMessage("book.add.success"));
+                        }catch (IllegalArgumentException e) {
+                            System.out.println(e.getMessage());
                         }
                     }
                     case 3 -> {
-                        System.out.print("Enter book ID to edit: ");
+                        System.out.print(messageService.getMessage("book.edit.id"));
                         int id = scanner.nextInt();
                         scanner.nextLine();
-                        System.out.print("New title: ");
+                        System.out.print(messageService.getMessage("book.edit.title"));
                         String title = scanner.nextLine();
-                        System.out.print("New author: ");
+                        System.out.print(messageService.getMessage("book.edit.author"));
                         String author = scanner.nextLine();
-                        System.out.print("New description: ");
+                        System.out.print(messageService.getMessage("book.edit.description"));
                         String description = scanner.nextLine();
 
                         try {
                             bookService.updateBook(new Book(id, title, author, description));
-                            System.out.println("Book successfully updated!");
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                        } catch (NoSuchElementException e) {
+                            System.out.println(messageService.getMessage("book.edit.success"));
+                        } catch (IllegalArgumentException | NoSuchElementException e) {
                             System.out.println(e.getMessage());
                         }
-
                     }
                     case 4 -> {
-                        System.out.print("Enter book ID to delete: ");
+                        System.out.print(messageService.getMessage("book.delete.id"));
                         int id = scanner.nextInt();
                         scanner.nextLine();
-
-                        boolean deleted = bookService.deleteBook(id);
-
-                        if (deleted) {
-                            System.out.println("Book deleted!");
-                        } else {
-                            System.out.println("Book with ID " + id + " not found!");
+                        try {bookService.deleteBook(id);
+                        System.out.println(messageService.getMessage("book.delete.success"));}
+                        catch(NoSuchElementException e){
+                            System.out.println(e.getMessage());
                         }
-
                     }
                     case 5 -> {
-                        System.out.print("Enter searching keyword: ");
+                        System.out.print(messageService.getMessage("search.keyword"));
                         String keyword = scanner.nextLine();
                         List<Book> foundBooks = bookService.searchByKeyword(keyword);
                         if (foundBooks.isEmpty()) {
-                            System.out.println("No books found matching: " + keyword);
+                            System.out.println(messageService.getMessage("search.noresults", keyword));
                         } else {
-                            System.out.println("Found books:");
-                            foundBooks.forEach(book-> System.out.println(book));
+                            System.out.println(messageService.getMessage("search.results"));
+                            bookService.printLocalizedBooks(foundBooks);
                         }
                     }
                     case 6 -> {
-                        System.out.println("Closing...");
+                        System.out.println(messageService.getMessage("app.closing"));
                         scanner.close();
                         return;
                     }
-
-                    default -> System.out.println("Invalid choice! Please try again.");
+                    default -> System.out.println(messageService.getMessage("error.invalid.choice"));
                 }
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input! Please enter a valid number.");
+                System.out.println(messageService.getMessage("error.invalid.input"));
                 scanner.nextLine();
             }
         }

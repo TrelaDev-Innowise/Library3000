@@ -1,9 +1,9 @@
 package dev.trela.testing.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.trela.testing.service.MessageService;
 
 public class Book {
-
 
     private int id;
     private String title;
@@ -31,15 +31,5 @@ public class Book {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
 
 }

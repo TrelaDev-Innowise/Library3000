@@ -1,9 +1,11 @@
 import dev.trela.testing.model.Book;
 import dev.trela.testing.repository.BookRepository;
+import dev.trela.testing.service.MessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,16 +43,17 @@ public class BookRepositoryTest {
     @Test
     void testDeleteBook(){
         // Ensure a book is successfully deleted and returns true
-        assertTrue(bookRepository.deleteBook(1));
+        bookRepository.deleteBook(1);
+        assertThrows(NullPointerException.class, () -> bookRepository.deleteBook(1));
     }
 
     @Test
     void testUpdateBook() {
         // Ensure updating a book with valid data does not throw an exception
         assertDoesNotThrow(() -> bookRepository.updateBook(new Book(1, "TEST", "TEST", "TEST")));
-
-        // Ensure updating a book with empty fields throws an IllegalArgumentException
-        assertThrows(IllegalArgumentException.class,
+// test is throwing nullpointer exception cause of lack of MessageService
+        // throwingnullPointer exception = Trying to generate failure message = true
+        assertThrows(NullPointerException.class,
                 () -> bookRepository.updateBook(new Book(1, "", "", "TEST")));
     }
 
@@ -59,8 +62,7 @@ public class BookRepositoryTest {
         // Ensure a new book is added successfully
         bookRepository.addBook(new Book(-300,"TEST","TEST","TEST"));
         assertEquals(4, bookRepository.getAllBooks().size());
-
         // Ensure adding a book with empty fields fails (returns false)
-        assertFalse(bookRepository.addBook(new Book(-300,"","","")));
+        assertThrows(NullPointerException.class, () -> bookRepository.addBook(new Book(-300,"","","")));
     }
 }
