@@ -24,7 +24,7 @@ Alternatively, you can build the project and run the fat JAR. In that case, the 
 First, compile the project and generate a fat JAR (with all dependencies):  
 
 ```sh
-./gradlew shadowJar
+gradlew shadowJar
 ```
 
 ### 3️⃣ Run the application  
@@ -130,7 +130,7 @@ The project includes **unit tests** and **integration tests**:
 Run tests with:  
 
 ```sh
-./gradlew test
+gradlew test
 ```
 
 ---
