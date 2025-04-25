@@ -70,20 +70,24 @@ public class BookRepository {
 
     public void addBook(Book book) throws IllegalArgumentException {
         List<Book> books = getAllBooks(); // Load existing books
+        validateBookFields(book);
+        book.setId(generateNewId(books));
+        books.add(book);
+        saveAllBooks(books);
+    }
 
+    private int generateNewId(List<Book> books){
+        return books.isEmpty() ? 1 : books.getLast().getId() + 1;
+    }
+
+
+    private void validateBookFields(Book book) throws IllegalArgumentException{
         boolean isAnyFieldEmpty = book.getAuthor().isEmpty()||
                 book.getDescription().isEmpty() ||
                 book.getTitle().isEmpty();
-
         if (isAnyFieldEmpty) {
             throw new IllegalArgumentException(messageService.getMessage("error.empty.fields"));
         }
-
-        // Assign a unique ID to the new book
-        book.setId(books.isEmpty() ? 1 : books.getLast().getId() + 1);
-
-        books.add(book);
-        saveAllBooks(books);
     }
 
     public void deleteBook(int bookId) {
@@ -106,14 +110,8 @@ public class BookRepository {
 
 
     public void updateBook(Book updatedBook) {
-        boolean isAnyFieldEmpty = updatedBook.getAuthor().isEmpty() ||
-                updatedBook.getDescription().isEmpty() ||
-                updatedBook.getTitle().isEmpty();
 
-        if (isAnyFieldEmpty) {
-            throw new IllegalArgumentException(messageService.getMessage("error.empty.fields"));
-        }
-
+        validateBookFields(updatedBook);
         List<Book> books = getAllBooks();
 
         Optional<Book> optionalExistingBook = books.stream()
