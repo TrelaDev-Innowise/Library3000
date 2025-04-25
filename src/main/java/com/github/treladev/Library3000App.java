@@ -1,9 +1,9 @@
-package dev.trela.testing;
+package com.github.treladev;
 
-import dev.trela.testing.config.LibraryConfig;
-import dev.trela.testing.model.Book;
-import dev.trela.testing.service.BookService;
-import dev.trela.testing.service.MessageService;
+import com.github.treladev.config.LibraryConfig;
+import com.github.treladev.model.Book;
+import com.github.treladev.service.BookService;
+import com.github.treladev.service.MessageService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

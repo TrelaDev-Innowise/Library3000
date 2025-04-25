@@ -1,4 +1,4 @@
-package dev.trela.testing.service;
+package com.github.treladev.service;
 
 
 import org.springframework.context.MessageSource;

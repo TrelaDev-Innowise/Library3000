@@ -1,10 +1,10 @@
-package dev.trela.testing.repository;
+package com.github.treladev.repository;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import dev.trela.testing.model.Book;
-import dev.trela.testing.service.MessageService;
+import com.github.treladev.model.Book;
+import com.github.treladev.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

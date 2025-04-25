@@ -1,11 +1,9 @@
-import dev.trela.testing.model.Book;
-import dev.trela.testing.repository.BookRepository;
-import dev.trela.testing.service.MessageService;
+import com.github.treladev.model.Book;
+import com.github.treladev.repository.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

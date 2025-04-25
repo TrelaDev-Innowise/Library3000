@@ -1,4 +1,4 @@
-package dev.trela.testing.config;
+package com.github.treladev.config;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

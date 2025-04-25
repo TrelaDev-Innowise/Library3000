@@ -1,6 +1,6 @@
-package dev.trela.testing.service;
-import dev.trela.testing.model.Book;
-import dev.trela.testing.repository.BookRepository;
+package com.github.treladev.service;
+import com.github.treladev.model.Book;
+import com.github.treladev.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

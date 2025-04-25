@@ -1,7 +1,4 @@
-package dev.trela.testing.model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.trela.testing.service.MessageService;
+package com.github.treladev.model;
 
 public class Book {
 
