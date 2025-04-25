@@ -87,6 +87,39 @@ Your choice:
 
 ---
 
+# 🌍 Multi-Language Support
+
+The application supports multiple languages, allowing users to switch between different languages (such as English and Polish) for all messages in the app. To switch languages, the system uses the Spring `MessageSource` service, which loads messages from properties files (such as `messages_en.properties` and `messages_pl.properties`).
+
+## Example Messages in English:
+- `"logging.calling"` - "Calling method {0} with parameters {1}"
+- `"logging.cached.result"` - "Returning cached result for method {0} with parameters {1}"
+
+## Example Messages in Polish:
+- `"logging.calling"` - "Wywołanie metody {0} z parametrami {1}"
+- `"logging.cached.result"` - "Zwracanie wyników z pamięci podręcznej dla metody {0} z parametrami {1}"
+
+To switch the language in the application, the `MessageService` class allows you to set the current locale via the `setLocale(Locale locale)` method.
+
+---
+# 🛠 AOP Logging and Caching
+
+This application also uses Aspect-Oriented Programming (AOP) to log method calls and cache method results to optimize performance. The `LoggingAndCachingAspect` class intercepts calls to service methods (excluding `MessageService`) and does the following:
+
+## 📜 What the Aspect Does:
+- Logs method calls and their parameters.
+- Checks the cache for the results of methods that have arguments and return values.
+- If a cached result is available, it is returned instead of re-executing the method.
+- Caches results when a method executes and has a non-null return value.
+
+## Example Log Output:
+- `"logging.calling"`: Logs when a method is called, including its parameters.
+- `"logging.returned"`: Logs when a method returns, including the returned value and the duration of the execution.
+- `"logging.caching.result"`: Logs when a result is cached for later use.
+
+---
+
+
 ## 🧪 Testing  
 
 The project includes **unit tests** and **integration tests**:  
@@ -97,7 +130,7 @@ The project includes **unit tests** and **integration tests**:
 Run tests with:  
 
 ```sh
-./gradlew test
+gradlew test
 ```
 
 ---
