@@ -1,7 +1,6 @@
 package dev.trela.testing;
 
 import dev.trela.testing.config.LibraryConfig;
-import dev.trela.testing.learning.Calculator;
 import dev.trela.testing.model.Book;
 import dev.trela.testing.service.BookService;
 import dev.trela.testing.service.MessageService;
@@ -13,7 +12,6 @@ import java.util.*;
 public class Library3000App {
     public static void main(String[] args) {
 
-        // Inicjalizacja kontekstu aplikacji Spring
         ApplicationContext context = new AnnotationConfigApplicationContext(LibraryConfig.class);
         BookService bookService = context.getBean(BookService.class);
         MessageService messageService = context.getBean(MessageService.class);
@@ -22,7 +20,7 @@ public class Library3000App {
         System.out.println(messageService.getMessage("language.selection"));
         int languageChoice = scanner.nextInt();
         if (languageChoice == 2) {
-            messageService.setLocale(Locale.forLanguageTag("pl")); // Ustawienie języka na Polski
+            messageService.setLocale(Locale.forLanguageTag("pl"));
         }
 
         while (true) {

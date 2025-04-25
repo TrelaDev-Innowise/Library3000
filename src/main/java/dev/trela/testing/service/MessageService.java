@@ -19,7 +19,7 @@ public void setLocale(Locale locale){
     this.currentLocale = locale;
 }
 
-//null = optional argument
+
 public String getMessage(String code){
     return messageSource.getMessage(code,null,currentLocale);
 }

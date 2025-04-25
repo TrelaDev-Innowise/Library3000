@@ -22,13 +22,6 @@ public class LoggingAndCachingAspect {
     // Cache map to store method results based on unique method signature + arguments
     private final Map<String, Object> cache = new HashMap<>();
 
-//    // ANSI color codes for colored console output
-//    private static final String GREEN = "\u001B[32m";
-//    private static final String RESET = "\u001B[0m";
-//    private static final String BLUE = "\u001B[34m";
-//    private static final String YELLOW = "\u001B[33m";
-//    private static final String CYAN = "\u001B[36m";
-
     private final MessageService messageService;
 
     // Constructor-based dependency injection of the MessageService
@@ -53,7 +46,6 @@ public class LoggingAndCachingAspect {
         Object[] args = joinPoint.getArgs();
         String key = className + "." + methodName + Arrays.toString(args);
 
-        // Log the method call
         System.out.println(messageService.getMessage("logging.calling", key));
 
         // If the method has arguments and a non-void return type, check the cache
@@ -73,9 +65,9 @@ public class LoggingAndCachingAspect {
         long endTime = System.currentTimeMillis();
         long duration = endTime-startTime;
 
-        String executionMessage ="";
+        String executionMessage;
         if(methodSignature.getReturnType().equals(void.class)){
-            executionMessage = messageService.getMessage("logging.void");
+            executionMessage = messageService.getMessage("logging.void",methodName,duration);
 
         }else{
             executionMessage = messageService.getMessage("logging.returned", methodName, result,duration);
