@@ -69,7 +69,7 @@ public class BookRepository {
 
 
     public void addBook(Book book) throws IllegalArgumentException {
-        List<Book> books = getAllBooks(); // Load existing books
+        List<Book> books = getAllBooks();
         validateBookFields(book);
         book.setId(generateNewId(books));
         books.add(book);
@@ -101,8 +101,8 @@ public class BookRepository {
         );
 
         if (index >= 0) {
-            books.remove(index);     // Remove the book from the list
-            saveAllBooks(books);     // Save the updated list
+            books.remove(index);     
+            saveAllBooks(books);     
         } else {
             throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
@@ -121,7 +121,7 @@ public class BookRepository {
         if (optionalExistingBook.isPresent()) {
             int existingBookIndex = books.indexOf(optionalExistingBook.get());
             books.set(existingBookIndex, updatedBook);  // Replace old book with the updated one
-            saveAllBooks(books);                        // Save changes
+            saveAllBooks(books);                   
         } else {
             throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
