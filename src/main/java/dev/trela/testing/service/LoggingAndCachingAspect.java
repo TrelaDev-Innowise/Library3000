@@ -1,4 +1,4 @@
-package com.github.treladev.service;
+package dev.trela.testing.service;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -71,7 +71,6 @@ public class LoggingAndCachingAspect {
 
         }else{
             executionMessage = messageService.getMessage("logging.returned", methodName, result,duration);
-            System.out.println(executionMessage);
         }
 
         // Log the returned result

@@ -1,8 +1,14 @@
 package dev.trela.testing.repository;
 
+
+
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
 import dev.trela.testing.model.Book;
+import dev.trela.testing.service.MessageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
@@ -10,159 +16,133 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Repository class that manages books stored in a CSV file.
- * It allows retrieving, adding, updating, and deleting books.
+ * Repository class responsible for managing book data stored in a CSV file.
+ * Provides functionality to retrieve, add, update, delete, and search books.
  */
-@Repository // Marks this class as a Spring repository (data access layer)
+@Repository // Indicates this class is part of the data access layer in Spring
 public class BookRepository {
 
-    // Path to the CSV file that stores book data
     private static final String CSV_FILE_PATH = "src/main/resources/books.csv";
-
-    // Jackson CSV Mapper to read/write CSV files
     private final CsvMapper csvMapper = new CsvMapper();
 
-    /**
-     * Defines the CSV schema, specifying column names and data types.
-     */
+    // Service used to retrieve localized or custom error messages
+    private MessageService messageService;
+
+    @Autowired
+    public void setMessageService(MessageService messageService){
+        this.messageService = messageService;
+    }
+
+    // Defines the CSV schema including headers and column types
     private final CsvSchema schema = CsvSchema.builder()
-            .addColumn("id", CsvSchema.ColumnType.NUMBER)  // ID column (integer)
-            .addColumn("title", CsvSchema.ColumnType.STRING) // Book title (string)
-            .addColumn("author", CsvSchema.ColumnType.STRING) // Book author (string)
-            .addColumn("description", CsvSchema.ColumnType.STRING) // Book description (string)
-            .setUseHeader(true) // The first row in the CSV file is the header
-            .setColumnSeparator(',') // Columns are separated by commas
-            .setQuoteChar('"') // Text fields are enclosed in double quotes if needed
+            .addColumn("id", CsvSchema.ColumnType.NUMBER)
+            .addColumn("title", CsvSchema.ColumnType.STRING)
+            .addColumn("author", CsvSchema.ColumnType.STRING)
+            .addColumn("description", CsvSchema.ColumnType.STRING)
+            .setUseHeader(true)
+            .setColumnSeparator(',')
+            .setQuoteChar('"')
             .build();
 
-    /**
-     * Retrieves all books from the CSV file.
-     *
-     * @return a list of books
-     */
-    public List<Book> getAllBooks() {
 
+    public List<Book> getAllBooks() {
         try {
             File file = new File(CSV_FILE_PATH);
 
+            // If the file doesn't exist, create it along with its parent directories
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
-                file.createNewFile();
+                boolean created = file.createNewFile();
+                if (!created) {
+                    throw new IOException("File already exists or couldn't be created: " + file.getAbsolutePath());
+                }
             }
 
+            try (MappingIterator<Book> it = csvMapper.readerFor(Book.class).with(schema).readValues(file)) {
+                return it.readAll();
+            }
 
-
-            // If the file does not exist, return an empty list
-            if (!file.exists()) return new ArrayList<>();
-
-            // Read the file and map it to a list of Book objects
-            return csvMapper.readerFor(Book.class).with(schema).<Book>readValues(file).readAll();
         } catch (IOException e) {
-            throw new RuntimeException("Error reading CSV file", e);
+            throw new RuntimeException(messageService.getMessage("error.reading.csv"), e);
         }
     }
 
-    /**
-     * Adds a new book to the CSV file.
-     *
-     * @param book the book object to add
-     */
-    public boolean addBook(Book book) {
-        List<Book> books = getAllBooks(); // Retrieve the current list of books
 
-        boolean isAnyFieldEmpty = book.getAuthor().equals("") || book.getDescription().equals("") || book.getTitle().equals("");
+    public void addBook(Book book) throws IllegalArgumentException {
+        List<Book> books = getAllBooks(); // Load existing books
 
-        if(isAnyFieldEmpty) return false;
+        boolean isAnyFieldEmpty = book.getAuthor().isEmpty()||
+                book.getDescription().isEmpty() ||
+                book.getTitle().isEmpty();
 
-        // Assign an ID to the new book (increment the last ID in the file)
-        book.setId(books.isEmpty() ? 1 : books.get(books.size() - 1).getId() + 1);
+        if (isAnyFieldEmpty) {
+            throw new IllegalArgumentException(messageService.getMessage("error.empty.fields"));
+        }
 
-        books.add(book); // Add the book to the list
-        saveAllBooks(books); // Save the updated list to the file
-        return true;
+        // Assign a unique ID to the new book
+        book.setId(books.isEmpty() ? 1 : books.getLast().getId() + 1);
+
+        books.add(book);
+        saveAllBooks(books);
     }
 
-    /**
-     * Deletes a book by its ID.
-     *
-     * @param bookId the ID of the book to delete
-     * @return true if the book was deleted, false if no book was found with the given ID
-     */
-    public boolean deleteBook(int bookId) {
-        List<Book> books = getAllBooks(); // Retrieve the list of books
+    public void deleteBook(int bookId) {
+        List<Book> books = getAllBooks();
 
-        // Use binary search to find the book (assuming IDs are sorted)
+        // Use binary search assuming the list is sorted by ID
         int index = Collections.binarySearch(
                 books,
                 new Book(bookId, null, null, null),
-                (book1, book2) -> Integer.compare(book1.getId(), book2.getId())
+                Comparator.comparingInt(Book::getId)
         );
 
-        // If the book is found, remove it
         if (index >= 0) {
-            books.remove(index);
-            saveAllBooks(books); // Save the changes to the file
-            return true;
+            books.remove(index);     // Remove the book from the list
+            saveAllBooks(books);     // Save the updated list
         } else {
-            return false; // No book found with the given ID
+            throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
     }
 
-    /**
-     * Updates an existing book.
-     *
-     * @param updatedBook the updated book object
-     */
+
     public void updateBook(Book updatedBook) {
+        boolean isAnyFieldEmpty = updatedBook.getAuthor().isEmpty() ||
+                updatedBook.getDescription().isEmpty() ||
+                updatedBook.getTitle().isEmpty();
 
-        boolean isAnyFieldEmpty = updatedBook.getAuthor().equals("") ||  updatedBook.getDescription().equals("") || updatedBook.getTitle().equals("");
-
-        if (isAnyFieldEmpty){
-            throw new IllegalArgumentException("Failed to update the book: All fields must be filled.");
+        if (isAnyFieldEmpty) {
+            throw new IllegalArgumentException(messageService.getMessage("error.empty.fields"));
         }
 
-        List<Book> books = getAllBooks(); // Retrieve the list of books
+        List<Book> books = getAllBooks();
 
-        // Find the book with the given ID
         Optional<Book> optionalExistingBook = books.stream()
                 .filter(book -> book.getId() == updatedBook.getId())
                 .findFirst();
 
         if (optionalExistingBook.isPresent()) {
             int existingBookIndex = books.indexOf(optionalExistingBook.get());
-            books.set(existingBookIndex, updatedBook); // Replace the old book with the updated version
-            saveAllBooks(books); // Save the changes to the file
-
+            books.set(existingBookIndex, updatedBook);  // Replace old book with the updated one
+            saveAllBooks(books);                        // Save changes
         } else {
-            throw new NoSuchElementException("Failed to update the book: No book found with the given ID (" + updatedBook.getId() + ").");
+            throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
     }
 
-    /**
-     * Saves a list of books to the CSV file (overwrites the existing file).
-     *
-     * @param books the list of books to save
-     */
+
     public void saveAllBooks(List<Book> books) {
         try {
             csvMapper.writer(schema).writeValue(new File(CSV_FILE_PATH), books);
         } catch (IOException e) {
-            throw new RuntimeException("Error writing to CSV file", e);
+            throw new RuntimeException(messageService.getMessage("error.writing.csv"), e);
         }
     }
-    /**
-     * Searches for books with given keyword
-     *
-     * @param keyword the list of books to save
-     */
 
-    public List<Book> searchByKeyword(String keyword){
+    public List<Book> searchByKeyword(String keyword) {
         return getAllBooks().stream()
                 .filter(book -> book.getTitle().toLowerCase().contains(keyword.toLowerCase()) ||
                         book.getAuthor().toLowerCase().contains(keyword.toLowerCase()) ||
                         book.getDescription().toLowerCase().contains(keyword.toLowerCase()))
                 .toList();
     }
-
-
 }
