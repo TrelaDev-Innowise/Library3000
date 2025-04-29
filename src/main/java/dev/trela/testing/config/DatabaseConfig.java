@@ -31,6 +31,7 @@ public class DatabaseConfig {
     public Flyway flyway(DataSource dataSource){
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
+                .validateMigrationNaming(true)
                 .locations("classpath:db/migration")
                 .load();
         flyway.migrate();

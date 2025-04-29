@@ -39,6 +39,7 @@ tasks.shadowJar {
     manifest {
         attributes["Main-Class"] = "dev.trela.testing.Library3000App"
     }
+    mergeServiceFiles()
 }
 
 tasks.register("checkPlugins") {
