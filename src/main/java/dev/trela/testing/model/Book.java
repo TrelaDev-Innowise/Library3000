@@ -1,32 +1,35 @@
 package dev.trela.testing.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Book {
 
     private int id;
     private String title;
-    private String author;
     private String description;
-    public Book() {}
+    private int pages;
+    private BigDecimal rating;
+    private List<Author> authors;
+    private Genre genre;
 
-
-    public Book(int id, String title, String author, String description) {
-        this.id = id;
+    public Book(String title, String description, int pages, BigDecimal rating, List<Author> authors , Genre genre) {
         this.title = title;
-        this.author = author;
         this.description = description;
+        this.pages = pages;
+        this.rating = rating;
+        this.authors = authors;
+        this.genre = genre;
     }
 
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 
 }
