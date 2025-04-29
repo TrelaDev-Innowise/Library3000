@@ -2,6 +2,7 @@ package dev.trela.testing.repository;
 
 import dev.trela.testing.model.Author;
 import dev.trela.testing.model.Genre;
+import dev.trela.testing.service.MessageService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,9 +16,11 @@ public class AuthorRepository {
 
 
     private final JdbcTemplate jdbcTemplate;
+    private final MessageService messageService;
 
-    public AuthorRepository(JdbcTemplate jdbcTemplate){
+    public AuthorRepository(JdbcTemplate jdbcTemplate,MessageService messageService){
         this.jdbcTemplate = jdbcTemplate;
+        this.messageService = messageService;
     }
 
 

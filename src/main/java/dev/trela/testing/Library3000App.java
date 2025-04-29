@@ -22,8 +22,6 @@ public class Library3000App {
 
     public static void main(String[] args) {
 
-
-
         ApplicationContext context = new AnnotationConfigApplicationContext(LibraryConfig.class);
         BookService bookService = context.getBean(BookService.class);
         GenreService genreService = context.getBean(GenreService.class);
@@ -31,9 +29,13 @@ public class Library3000App {
         AuthorService authorService = context.getBean(AuthorService.class);
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println();
+        System.out.println("Welcome to Library 3000!");
+
         handleLanguageSelection(messageService,scanner);
 
         boolean isCurrentLanguagePolish = messageService.isCurrentLocale("pl");
+
 
         while (true) {
             printMenu(messageService);
@@ -60,6 +62,9 @@ public class Library3000App {
         }
     }
     private static void handleLanguageSelection(MessageService messageService,Scanner scanner){
+        System.out.println();
+
+
         System.out.println(messageService.getMessage("language.selection"));
         int languageChoice = scanner.nextInt();
         if (languageChoice == 2) {
@@ -92,7 +97,7 @@ public class Library3000App {
         String title = scanner.nextLine();
 
         System.out.print(messageService.getMessage("book.add.author"));
-        List<Author> authors = collectAuthorsFromUser(scanner,authorService);
+        List<Author> authors = collectAuthorsFromUser(messageService,authorService,scanner);
 
         System.out.print(messageService.getMessage("book.add.description"));
         String description = scanner.nextLine();
@@ -140,7 +145,7 @@ public class Library3000App {
         String title = scanner.nextLine();
 
         System.out.print(messageService.getMessage("book.edit.author"));
-        List<Author> authors = collectAuthorsFromUser(scanner,authorService);
+        List<Author> authors = collectAuthorsFromUser(messageService,authorService,scanner);
 
         System.out.print(messageService.getMessage("book.edit.description"));
         String description = scanner.nextLine();
@@ -174,15 +179,15 @@ public class Library3000App {
     }
 
 
-    private static List<Author> collectAuthorsFromUser(Scanner scanner, AuthorService authorService){
+    private static List<Author> collectAuthorsFromUser(MessageService messageService, AuthorService authorService, Scanner scanner){
         List<Author> authors = new ArrayList<>();
-        System.out.println(" type an author name or type '1' to add multiple authors:");
+        System.out.println(messageService.getMessage("author.input.prompt"));
         String input = scanner.nextLine();
 
         if ("1".equals(input)) {
-            System.out.println("You chose to add multiple authors. Type '2' when finished.");
+            System.out.println(messageService.getMessage("author.multiple.authors.prompt"));
             while (true) {
-                System.out.print("Enter author name: ");
+                System.out.println(messageService.getMessage("author.name.input"));
                 String authorName = scanner.nextLine();
                 if ("2".equalsIgnoreCase(authorName)) {
                     break;

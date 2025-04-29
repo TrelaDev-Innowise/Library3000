@@ -19,6 +19,7 @@ public class BookService {
     public BookService(MessageService messageService, BookRepository bookRepositoryDb){
         this.messageService = messageService;
         this.bookRepositoryDb = bookRepositoryDb;
+
     }
 
     public List<Book> getAllBooks(){
@@ -74,7 +75,7 @@ public class BookService {
         BigDecimal maxRating = new BigDecimal("5");
 
         if (rating.compareTo(minRating) < 0 || rating.compareTo(maxRating) > 0) {
-            throw new IllegalArgumentException("Rating must be between 0 and 5.");
+            throw new IllegalArgumentException(messageService.getMessage("error.rating.range"));
         }
     }
 

@@ -1,76 +1,93 @@
 # 📚 Library3000App
 
-Library3000App is a simple console application for managing books, written in Java using Spring. Book data is stored in a CSV file.
-
-## ✨ Features  
+Library3000App is a console application for managing books, written in Java using Spring.  
+Book data is now stored in a PostgreSQL database via Docker and accessed using **Spring JDBC (JdbcTemplate)**.
+## ✨ Features
 ✅ Display the list of books  
 ✅ Add a new book  
 ✅ Edit a book  
 ✅ Delete a book  
 ✅ Search books by keyword  
+✅ Multi-language support (English, Polish)  
+✅ Logging & caching via Spring AOP
 
-## 🛠 Requirements  
+## 🛠 Requirements
 🔹 Java 17+  
 🔹 Gradle  
+🔹 Docker & Docker Compose
 
-## 🚀 Installation & Running  
+## 🚀 Setup & Running
 
-### 1️⃣ Open the Project  
-You can open the project in an IDE (like IntelliJ IDEA or Eclipse). The testing  `books.csv` file is located in the `src/main/resources` folder. Also there is `books_backup.csv` there for more convinient testing
+### 1️⃣ Start the Database
+Run the following command in the root of the project to start the PostgreSQL database using Docker Compose:
 
-Alternatively, you can build the project and run the fat JAR. In that case, the `books.csv` file will be created automatically in the folder where the JAR is executed.  
+```sh
+docker-compose up -d
+```
 
-### 2️⃣ Build the project  
-First, compile the project and generate a fat JAR (with all dependencies):  
+This will start a PostgreSQL container with the database used by the application.
+
+Flyway will automatically initialize the schema and insert sample data when the application starts.
+
+### 2️⃣ Build the Project
+Build the project and create a fat JAR:
 
 ```sh
 gradlew shadowJar
 ```
 
-### 3️⃣ Run the application  
-After building the project, run the application in the console:  
+### 3️⃣ Run the Application
+Once the database is up and the JAR is built, run the application:
 
 ```sh
 java -jar build/libs/Library3000-1.0-SNAPSHOT.jar
 ```
 
-📌 **Note:** If the `books.csv` file does not exist, the application will automatically create it in the `src/main/resources` folder with some sample books.  
-
 ---
 
-## 📂 Project Structure  
+## 📂 Project Structure
 
-```bash
+```
 src/
- ├── main/
- │   ├── java/dev/trela/testing/
- │   │   ├── config/       # Spring configuration
- │   │   ├── model/        # Book class (data model)
- │   │   ├── repository/   # CSV file operations
- │   │   ├── service/      # Business logic
- │   │   ├── Library3000App.java # Main application class
- │   ├── resources/        # books.csv file (CSV database)
- ├── test/                 # Unit & integration tests
- ├── build/                # Output folder after building the application
+└── main/
+    ├── java/
+    │   └── testing/
+    │       ├── config/           # Spring configuration (DataSource, MessageSource, etc.)
+    │       ├── model/            # Domain models: Book, Author, Genre
+    │       ├── repository/       # Repositories using JdbcTemplate
+    │       ├── service/          # Business logic layer
+    │       ├── util/             # Utility/helper classes (if any)
+    │       └── Library3000App.java  # Main application class (Spring Boot entry point)
+    └── resources/
+        ├── migration/
+        │   ├── V1__create_tables.sql
+        │   └── V2__insert_initial_data.sql
+        ├── messages_en.properties
+        └── messages_pl.properties
+
 ```
 
 ---
 
-## 📂 CSV File Format  
-The `books.csv` file follows this format:  
+## 🗃 Database Structure
 
-```bash
-id,title,author,description
-1,Hobbit,"J.R.R. Tolkien","Fantasy novel about Bilbo Baggins"
-2,1984,"George Orwell","Dystopian fiction about a totalitarian regime"
-3,Dziady,"Adam Mickiewicz","Polish dramatic poem about spirits and the afterlife"
-...
-```
+Instead of a CSV file, the application now uses a PostgreSQL database with the following schema:
+
+**Tables:**
+
+- `books`: `id`, `title`, `description`, `genre`, `rating`, `pages`
+- `authors`: `author_id`, `name`
+- `books_authors`: `book_id`, `author_id` (many-to-many relationship between books and authors)
+- `genres`: `id`, `name` (list of available book genres)
+
+The database schema is managed automatically by **Flyway**.
+
 
 ---
 
-## 🎮 How to Use?  
-After running the application, you will see the following menu:  
+## 🎮 How to Use
+
+After running the app, you will see a menu:
 
 ```sql
 Choose an option:
@@ -83,62 +100,48 @@ Choose an option:
 Your choice:
 ```
 
-🔹 **Search Feature:** Enter a keyword, and the program will display books whose title, author, or description contains the keyword.  
+🔹 Add a book with multiple authors  
+🔹 Search by keyword in title, description, or author name  
+🔹 Validation for fields like rating (0–5), genre, and pages
 
 ---
 
 # 🌍 Multi-Language Support
 
-The application supports multiple languages, allowing users to switch between different languages (such as English and Polish) for all messages in the app. To switch languages, the system uses the Spring `MessageSource` service, which loads messages from properties files (such as `messages_en.properties` and `messages_pl.properties`).
+The application supports multiple languages using `MessageSource`.
 
-## Example Messages in English:
-- `"logging.calling"` - "Calling method {0} with parameters {1}"
-- `"logging.cached.result"` - "Returning cached result for method {0} with parameters {1}"
-
-## Example Messages in Polish:
-- `"logging.calling"` - "Wywołanie metody {0} z parametrami {1}"
-- `"logging.cached.result"` - "Zwracanie wyników z pamięci podręcznej dla metody {0} z parametrami {1}"
-
-To switch the language in the application, the `MessageService` class allows you to set the current locale via the `setLocale(Locale locale)` method.
-
----
-# 🛠 AOP Logging and Caching
-
-This application also uses Aspect-Oriented Programming (AOP) to log method calls and cache method results to optimize performance. The `LoggingAndCachingAspect` class intercepts calls to service methods (excluding `MessageService`) and does the following:
-
-## 📜 What the Aspect Does:
-- Logs method calls and their parameters.
-- Checks the cache for the results of methods that have arguments and return values.
-- If a cached result is available, it is returned instead of re-executing the method.
-- Caches results when a method executes and has a non-null return value.
-
-## Example Log Output:
-- `"logging.calling"`: Logs when a method is called, including its parameters.
-- `"logging.returned"`: Logs when a method returns, including the returned value and the duration of the execution.
-- `"logging.caching.result"`: Logs when a result is cached for later use.
-
----
-
-
-## 🧪 Testing  
-
-The project includes **unit tests** and **integration tests**:  
-
-✅ **Unit tests** verify individual components like repository and service logic.  
-✅ **Integration tests** ensure the system works as expected when interacting with the CSV file.  
-
-Run tests with:  
-
-```sh
-gradlew test
+Language selection is prompted at runtime:
+```text
+Select language: 1 for English, 2 for Polski
 ```
 
+Localized messages are loaded from:
+- `messages.properties` (English)
+- `messages_pl.properties` (Polish)
+
+You can easily add new languages by adding more properties files.
+
 ---
 
-## ⚙ Technologies Used  
+# 🛠 AOP Logging and Caching
 
-🔹 **Java 17** – Programming language  
-🔹 **Spring Context** – Component management and IoC  
-🔹 **Jackson CSV** – Handling CSV files  
-🔹 **JUnit 5** – Unit & integration testing  
-🔹 **Gradle (Shadow Plugin)** – Creating a **fat JAR**  
+Implemented using Spring AOP. The `LoggingAndCachingAspect` handles:
+- Logging method calls, returns, and execution time
+- Caching return values of service methods to optimize performance
+
+---
+
+## ⚙ Technologies Used
+
+🔹 **Java 17** – Core language  
+🔹 **Spring Context & AOP** – Configuration, dependency injection, and aspect logic  
+🔹 **Spring JDBC (JdbcTemplate)** – Type-safe, efficient database access  
+🔹 **JDBC (JdbcTemplate)** – Database access  
+🔹 **PostgreSQL** – Relational database (via Docker)  
+🔹 **Flyway** – Database schema migration  
+🔹 **Gradle + Shadow Plugin** – Building fat JAR  
+🔹 **Docker Compose** – Running PostgreSQL instance
+🔹 **Lombok** – Reduces boilerplate code (getters, setters, constructors, etc.)
+
+---
+📌 **Note**: Make sure Docker is running before launching the application.

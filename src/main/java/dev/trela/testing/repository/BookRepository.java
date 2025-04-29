@@ -3,6 +3,7 @@ package dev.trela.testing.repository;
 import dev.trela.testing.model.Author;
 import dev.trela.testing.model.Book;
 import dev.trela.testing.model.Genre;
+import dev.trela.testing.service.MessageService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -12,9 +13,11 @@ import java.util.*;
 public class BookRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MessageService messageService;
 
-    public BookRepository(JdbcTemplate jdbcTemplate){
+    public BookRepository(JdbcTemplate jdbcTemplate,MessageService messageService){
         this.jdbcTemplate = jdbcTemplate;
+        this.messageService = messageService;
     }
 
 
@@ -87,7 +90,7 @@ public class BookRepository {
                 book.getId());
 
         if (updatedRows == 0) {
-            throw new NoSuchElementException("Book with id " + book.getId() + " not found");
+            throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
 
         // update ManyToMany relation book_authors (delete old records,add new)
@@ -141,7 +144,7 @@ public class BookRepository {
         String sql = "DELETE FROM books WHERE book_id = ?";
         int deletedRows = jdbcTemplate.update(sql,id);
         if (deletedRows == 0){
-            throw new NoSuchElementException("Book with id " + id + " not found");
+            throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
     }
 

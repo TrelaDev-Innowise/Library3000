@@ -9,14 +9,16 @@ import java.util.NoSuchElementException;
 @Service
 public class GenreService {
     private final GenreRepository genreRepository;
+    private final MessageService messageService;
 
-    public GenreService(GenreRepository genreRepository){
+    public GenreService(GenreRepository genreRepository,MessageService messageService){
         this.genreRepository = genreRepository;
+        this.messageService = messageService;
     }
 
     public void checkIfGenreExists(String genreName) {
         genreRepository.findByGenreName(genreName).orElseThrow(() ->
-                new NoSuchElementException("Genre not Found."));
+                new NoSuchElementException(messageService.getMessage("error.genre.notfound")));
     }
 
 
