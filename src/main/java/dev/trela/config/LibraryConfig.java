@@ -1,4 +1,4 @@
-package dev.trela.testing.config;
+package dev.trela.config;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,7 +8,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 
 @Configuration
 @EnableAspectJAutoProxy
-@ComponentScan(basePackages = "dev.trela.testing")
+@ComponentScan(basePackages = "dev.trela")
 public class  LibraryConfig {
 
     @Bean

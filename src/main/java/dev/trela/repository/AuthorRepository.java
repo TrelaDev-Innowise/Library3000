@@ -1,8 +1,7 @@
-package dev.trela.testing.repository;
+package dev.trela.repository;
 
-import dev.trela.testing.model.Author;
-import dev.trela.testing.model.Genre;
-import dev.trela.testing.service.MessageService;
+import dev.trela.model.Author;
+import dev.trela.service.MessageService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

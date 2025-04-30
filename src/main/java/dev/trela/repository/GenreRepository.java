@@ -1,7 +1,7 @@
-package dev.trela.testing.repository;
+package dev.trela.repository;
 
 
-import dev.trela.testing.model.Genre;
+import dev.trela.model.Genre;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

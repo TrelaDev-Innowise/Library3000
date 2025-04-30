@@ -1,4 +1,4 @@
-package dev.trela.testing.config;
+package dev.trela.config;
 
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;

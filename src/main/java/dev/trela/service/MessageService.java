@@ -1,4 +1,4 @@
-package dev.trela.testing.service;
+package dev.trela.service;
 
 
 import lombok.Getter;

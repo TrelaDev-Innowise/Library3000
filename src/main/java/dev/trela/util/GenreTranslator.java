@@ -1,4 +1,4 @@
-package dev.trela.testing.util;
+package dev.trela.util;
 
 import java.util.Map;
 public class GenreTranslator {

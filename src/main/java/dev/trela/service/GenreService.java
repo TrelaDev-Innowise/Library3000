@@ -1,6 +1,6 @@
-package dev.trela.testing.service;
-import dev.trela.testing.model.Genre;
-import dev.trela.testing.repository.GenreRepository;
+package dev.trela.service;
+import dev.trela.model.Genre;
+import dev.trela.repository.GenreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

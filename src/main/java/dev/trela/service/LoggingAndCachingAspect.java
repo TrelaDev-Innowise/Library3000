@@ -1,4 +1,4 @@
-package dev.trela.testing.service;
+package dev.trela.service;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,7 +38,7 @@ public class LoggingAndCachingAspect {
      * @return the method result (cached or freshly computed)
      * @throws Throwable if the underlying method throws an exception
      */
-    @Around("execution(* dev.trela.testing.service..*(..)) && !within(dev.trela.testing.service.MessageService)")
+    @Around("execution(* dev.trela.service..*(..)) && !within(dev.trela.service.MessageService)")
     public Object logAndCache(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         String className = methodSignature.getDeclaringType().getSimpleName();

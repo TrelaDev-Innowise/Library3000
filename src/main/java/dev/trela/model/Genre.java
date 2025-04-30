@@ -1,19 +1,16 @@
-package dev.trela.testing.model;
+package dev.trela.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class Author {
+@AllArgsConstructor
+public class Genre {
     private Integer id;
     private String name;
-    public Author(String name) {
+    public Genre(String name) {
         this.name = name;
-    }
-    public String toString(){
-        return name;
     }
 }

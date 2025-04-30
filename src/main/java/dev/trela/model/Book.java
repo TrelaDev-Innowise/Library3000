@@ -1,4 +1,4 @@
-package dev.trela.testing.model;
+package dev.trela.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

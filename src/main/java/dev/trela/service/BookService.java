@@ -1,7 +1,7 @@
-package dev.trela.testing.service;
+package dev.trela.service;
 
-import dev.trela.testing.model.Book;
-import dev.trela.testing.repository.BookRepository;
+import dev.trela.model.Book;
+import dev.trela.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

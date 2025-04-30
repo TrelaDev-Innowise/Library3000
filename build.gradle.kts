@@ -23,7 +23,7 @@ dependencies {
 
 }
 
-group = "dev.trela.testing"
+group = "dev.trela"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -37,7 +37,7 @@ tasks.test {
 tasks.shadowJar {
     archiveClassifier.set("")
     manifest {
-        attributes["Main-Class"] = "dev.trela.testing.Library3000App"
+        attributes["Main-Class"] = "dev.trela.Library3000App"
     }
     mergeServiceFiles()
 }

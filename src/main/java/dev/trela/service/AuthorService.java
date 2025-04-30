@@ -1,8 +1,8 @@
-package dev.trela.testing.service;
+package dev.trela.service;
 
-import dev.trela.testing.model.Author;
+import dev.trela.model.Author;
 
-import dev.trela.testing.repository.AuthorRepository;
+import dev.trela.repository.AuthorRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

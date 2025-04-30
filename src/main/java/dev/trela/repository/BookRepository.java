@@ -1,9 +1,9 @@
-package dev.trela.testing.repository;
+package dev.trela.repository;
 
-import dev.trela.testing.model.Author;
-import dev.trela.testing.model.Book;
-import dev.trela.testing.model.Genre;
-import dev.trela.testing.service.MessageService;
+import dev.trela.model.Author;
+import dev.trela.model.Book;
+import dev.trela.model.Genre;
+import dev.trela.service.MessageService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 

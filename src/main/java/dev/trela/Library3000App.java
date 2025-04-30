@@ -1,15 +1,15 @@
-package dev.trela.testing;
+package dev.trela;
 
 
-import dev.trela.testing.config.LibraryConfig;
-import dev.trela.testing.model.Author;
-import dev.trela.testing.model.Book;
-import dev.trela.testing.model.Genre;
-import dev.trela.testing.service.AuthorService;
-import dev.trela.testing.service.BookService;
-import dev.trela.testing.service.GenreService;
-import dev.trela.testing.service.MessageService;
-import dev.trela.testing.util.GenreTranslator;
+import dev.trela.config.LibraryConfig;
+import dev.trela.model.Author;
+import dev.trela.model.Book;
+import dev.trela.model.Genre;
+import dev.trela.service.AuthorService;
+import dev.trela.service.BookService;
+import dev.trela.service.GenreService;
+import dev.trela.service.MessageService;
+import dev.trela.util.GenreTranslator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
