@@ -12,7 +12,7 @@ Book data is now stored in a PostgreSQL database via Docker and accessed using *
 ✅ Logging & caching via Spring AOP
 
 ## 🛠 Requirements
-🔹 Java 17+  
+🔹 Java 21 
 🔹 Gradle  
 🔹 Docker & Docker Compose
 
