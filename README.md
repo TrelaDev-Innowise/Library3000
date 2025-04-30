@@ -27,7 +27,6 @@ docker-compose up -d
 
 This will start a PostgreSQL container with the database used by the application.
 
-Flyway will automatically initialize the schema and insert sample data when the application starts.
 
 ### 2️⃣ Build the Project
 Build the project and create a fat JAR:
@@ -43,6 +42,7 @@ Once the database is up and the JAR is built, run the application:
 java -jar build/libs/Library3000-1.0-SNAPSHOT.jar
 ```
 
+Flyway will automatically initialize the schema and insert sample data when the application starts.
 ---
 
 ## 📂 Project Structure
