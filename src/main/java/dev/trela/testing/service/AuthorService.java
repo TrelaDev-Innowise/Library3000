@@ -5,6 +5,7 @@ import dev.trela.testing.model.Author;
 import dev.trela.testing.repository.AuthorRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,6 +20,7 @@ public class AuthorService {
         this.authorRepository = authorRepository;
     }
 
+    @Transactional
     public void createAuthorIfNotExists(String authorName){
         Optional<Author> author = authorRepository.findByAuthorName(authorName);
         if(author.isEmpty()){

@@ -3,6 +3,7 @@ package dev.trela.testing.service;
 import dev.trela.testing.model.Book;
 import dev.trela.testing.repository.BookRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,6 +17,7 @@ public class BookService {
     private final BookRepository bookRepositoryDb;
 
 
+
     public BookService(MessageService messageService, BookRepository bookRepositoryDb){
         this.messageService = messageService;
         this.bookRepositoryDb = bookRepositoryDb;
@@ -26,14 +28,17 @@ public class BookService {
         return bookRepositoryDb.findAll();
     }
 
+    @Transactional
     public void addBook(Book book) throws IllegalArgumentException{
         bookRepositoryDb.save(book);
     }
 
+    @Transactional
     public void updateBook(Book book) throws NoSuchElementException{
         bookRepositoryDb.update(book);
     }
 
+    @Transactional
     public void deleteBook(int bookId) throws NoSuchElementException{
        bookRepositoryDb.deleteById(bookId);
     }

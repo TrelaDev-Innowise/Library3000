@@ -2,6 +2,7 @@ package dev.trela.testing.service;
 import dev.trela.testing.model.Genre;
 import dev.trela.testing.repository.GenreRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,10 +27,12 @@ public class GenreService {
         return genreRepository.findAll();
     }
 
+    @Transactional
     public void updateGenre(Genre genre) throws NoSuchElementException{
         genreRepository.update(genre);
     }
 
+    @Transactional
     public void deleteGenre(int id) throws NoSuchElementException{
         genreRepository.deleteById(id);
     }
