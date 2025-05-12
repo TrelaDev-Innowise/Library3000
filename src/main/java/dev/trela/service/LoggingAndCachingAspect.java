@@ -46,6 +46,11 @@ public class LoggingAndCachingAspect {
         Object[] args = joinPoint.getArgs();
         String key = className + "." + methodName + Arrays.toString(args);
 
+        if (methodName.equals("findAuthorByName")) {
+            return joinPoint.proceed(); // skip
+        }
+
+
         System.out.println(messageService.getMessage("logging.calling", key));
 
         // If the method has arguments and a non-void return type, check the cache

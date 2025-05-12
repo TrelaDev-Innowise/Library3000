@@ -5,6 +5,7 @@ import dev.trela.config.LibraryConfig;
 import dev.trela.model.Author;
 import dev.trela.model.Book;
 import dev.trela.model.Genre;
+import dev.trela.repository.AuthorRepository;
 import dev.trela.service.AuthorService;
 import dev.trela.service.BookService;
 import dev.trela.service.GenreService;
@@ -22,6 +23,7 @@ public class Library3000App {
 
     public static void main(String[] args) {
 
+
         ApplicationContext context = new AnnotationConfigApplicationContext(LibraryConfig.class);
         BookService bookService = context.getBean(BookService.class);
         GenreService genreService = context.getBean(GenreService.class);
@@ -29,12 +31,15 @@ public class Library3000App {
         AuthorService authorService = context.getBean(AuthorService.class);
         Scanner scanner = new Scanner(System.in);
 
+
         System.out.println();
         System.out.println("Welcome to Library 3000!");
 
         handleLanguageSelection(messageService,scanner);
 
         boolean isCurrentLanguagePolish = messageService.isCurrentLocale("pl");
+
+
 
 
         while (true) {
@@ -46,7 +51,7 @@ public class Library3000App {
                     case 1 -> handleDisplayBookList(messageService,bookService);
                     case 2 -> handleCreateNewBook(messageService,bookService,genreService,authorService,scanner,isCurrentLanguagePolish);
                     case 3 -> handleEditABook(messageService,bookService,genreService,authorService,scanner,isCurrentLanguagePolish);
-                    case 4 -> handleDeletaABook(messageService,bookService,scanner);
+                    case 4 -> handleDeleteABook(messageService,bookService,scanner);
                     case 5 -> handleSearchByKeyword(messageService,bookService,scanner);
                     case 6 -> {
                         System.out.println(messageService.getMessage("app.closing"));
@@ -86,6 +91,7 @@ public class Library3000App {
         System.out.println("\n" + messageService.getMessage("book.list"));
         bookService.printLocalizedBooks(bookService.getAllBooks());
     }
+
     private static void handleCreateNewBook(MessageService messageService,
                                            BookService bookService,
                                            GenreService genreService,
@@ -115,14 +121,12 @@ public class Library3000App {
         BigDecimal rating = scanner.nextBigDecimal();
         scanner.nextLine();
 
-
-
         try {
             genreService.checkIfGenreExists(genreName);
             bookService.validateRating(rating);
-            Genre newGenre = new Genre(genreName);
+            Genre chosenGenre = genreService.getGenreByName(genreName);
 
-            Book newBook = new Book(title,description,pages,rating,authors,newGenre);
+            Book newBook = new Book(title,description,pages,rating,authors,chosenGenre);
             bookService.addBook(newBook);
             System.out.println(messageService.getMessage("book.add.success"));
         }catch (IllegalArgumentException | NoSuchElementException e) {
@@ -132,20 +136,23 @@ public class Library3000App {
     }
 
     private static void handleEditABook(MessageService messageService,
-                                       BookService bookService,
-                                       GenreService genreService,
-                                       AuthorService authorService,
-                                       Scanner scanner,
-                                       boolean isCurrentLanguagePolish){
+                                        BookService bookService,
+                                        GenreService genreService,
+                                        AuthorService authorService,
+                                        Scanner scanner,
+                                        boolean isCurrentLanguagePolish) {
         System.out.print(messageService.getMessage("book.edit.id"));
         int id = scanner.nextInt();
         scanner.nextLine();
+
+
+        Book existingBook = bookService.getBookById(id);
 
         System.out.print(messageService.getMessage("book.edit.title"));
         String title = scanner.nextLine();
 
         System.out.print(messageService.getMessage("book.edit.author"));
-        List<Author> authors = collectAuthorsFromUser(messageService,authorService,scanner);
+        List<Author> authors = collectAuthorsFromUser(messageService, authorService, scanner);
 
         System.out.print(messageService.getMessage("book.edit.description"));
         String description = scanner.nextLine();
@@ -153,7 +160,7 @@ public class Library3000App {
         System.out.print(messageService.getMessage("book.edit.genre"));
         System.out.println(messageService.getMessage("book.genre.options"));
         String genreName = scanner.nextLine();
-        if(isCurrentLanguagePolish) genreName = GenreTranslator.translateToEnglish(genreName);
+        if (isCurrentLanguagePolish) genreName = GenreTranslator.translateToEnglish(genreName);
 
         System.out.print(messageService.getMessage("book.edit.pages"));
         int pages = scanner.nextInt();
@@ -163,27 +170,35 @@ public class Library3000App {
         BigDecimal rating = scanner.nextBigDecimal();
         scanner.nextLine();
 
-
         try {
             genreService.checkIfGenreExists(genreName);
-
             bookService.validateRating(rating);
-            Genre newGenre = new Genre(genreName);
-            Book updatedBook = new Book(id,title,description,pages,rating,authors,newGenre);
-            bookService.updateBook(updatedBook);
+
+
+            existingBook.setTitle(title);
+            existingBook.setDescription(description);
+            existingBook.setPages(pages);
+            existingBook.setRating(rating);
+            existingBook.setGenre(genreService.getGenreByName(genreName));
+
+
+            existingBook.getAuthors().clear();
+            existingBook.getAuthors().addAll(authors);
+
+            bookService.updateBook(existingBook);
             System.out.println(messageService.getMessage("book.edit.success"));
         } catch (IllegalArgumentException | NoSuchElementException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
 
+
+
     private static List<Author> collectAuthorsFromUser(MessageService messageService, AuthorService authorService, Scanner scanner){
-        List<Author> authors = new ArrayList<>();
+        Set<Author> authors = new LinkedHashSet<>();
         System.out.println(messageService.getMessage("author.input.prompt"));
         String input = scanner.nextLine();
-
         if ("1".equals(input)) {
             System.out.println(messageService.getMessage("author.multiple.authors.prompt"));
             while (true) {
@@ -192,19 +207,22 @@ public class Library3000App {
                 if ("2".equalsIgnoreCase(authorName)) {
                     break;
                 }
-                authors.add(new Author(authorName));
-                authorService.createAuthorIfNotExists(authorName);
+                Author newAuthor = authorService.findOrCreateAuthor(authorName);
+                authors.add(newAuthor);
             }
         } else {
-            authors.add(new Author(input));
-            authorService.createAuthorIfNotExists(input);
+            Author newAuthor = authorService.findOrCreateAuthor(input);
+            authors.add(newAuthor);
+
         }
 
-        return authors;
+        return new ArrayList<>(authors);
     }
 
 
-    private static void handleDeletaABook(MessageService messageService, BookService bookService, Scanner scanner) {
+
+
+    private static void handleDeleteABook(MessageService messageService, BookService bookService, Scanner scanner) {
         System.out.print(messageService.getMessage("book.delete.id"));
         int id = scanner.nextInt();
         scanner.nextLine();

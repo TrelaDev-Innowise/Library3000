@@ -21,21 +21,26 @@ public class GenreService {
         genreRepository.findByGenreName(genreName).orElseThrow(() ->
                 new NoSuchElementException(messageService.getMessage("error.genre.notfound")));
     }
-
-
-    public List<Genre> getAllGenres(){
-        return genreRepository.findAll();
+    public Genre getGenreByName(String genreName){
+        return genreRepository.findByGenreName(genreName)
+                .orElseThrow(() -> new NoSuchElementException(
+                        messageService.getMessage("error.genre.notfound")
+                ));
     }
 
-    @Transactional
-    public void updateGenre(Genre genre) throws NoSuchElementException{
-        genreRepository.update(genre);
-    }
-
-    @Transactional
-    public void deleteGenre(int id) throws NoSuchElementException{
-        genreRepository.deleteById(id);
-    }
+//    public List<Genre> getAllGenres(){
+//        return genreRepository.findAll();
+//    }
+//
+//    @Transactional
+//    public void updateGenre(Genre genre) throws NoSuchElementException{
+//        genreRepository.update(genre);
+//    }
+//
+//    @Transactional
+//    public void deleteGenre(int id) throws NoSuchElementException{
+//        genreRepository.deleteById(id);
+//    }
 
 
 

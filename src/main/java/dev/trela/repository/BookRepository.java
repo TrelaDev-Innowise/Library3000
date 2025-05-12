@@ -4,205 +4,136 @@ import dev.trela.model.Author;
 import dev.trela.model.Book;
 import dev.trela.model.Genre;
 import dev.trela.service.MessageService;
+import jakarta.persistence.criteria.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Repository
+@Transactional
 public class BookRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final SessionFactory sessionFactory;
     private final MessageService messageService;
 
-    public BookRepository(JdbcTemplate jdbcTemplate,MessageService messageService){
-        this.jdbcTemplate = jdbcTemplate;
+    public BookRepository(SessionFactory sessionFactory, MessageService messageService){
+        this.sessionFactory = sessionFactory;
         this.messageService = messageService;
     }
 
-
-
     public List<Book> findAll() {
-        String sql = """
-        SELECT b.book_id, b.title, b.description, b.pages, b.rating,
-               g.genre_id, g.name AS genre_name,
-               a.author_id, a.name AS author_name
-        FROM books b
-        JOIN genres g ON b.genre_id = g.genre_id
-        JOIN book_authors ba ON b.book_id = ba.book_id
-        JOIN authors a ON ba.author_id = a.author_id
-        ORDER BY b.book_id, a.author_id
-        """;
-
-        return jdbcTemplate.query(sql, rs -> {
-            Map<Integer, Book> bookMap = new LinkedHashMap<>();
-            while (rs.next()) {
-                int bookId = rs.getInt("book_id");
-                Book book = bookMap.get(bookId);
-
-                // if book is not in bookMap
-
-                if (book == null) {
-                    book = new Book();
-                    book.setId(bookId);
-                    book.setTitle(rs.getString("title"));
-                    book.setDescription(rs.getString("description"));
-                    book.setPages(rs.getInt("pages"));
-                    book.setRating(rs.getBigDecimal("rating"));
-
-                    Genre genre = new Genre();
-                    genre.setId(rs.getInt("genre_id"));
-                    genre.setName(rs.getString("genre_name"));
-                    book.setGenre(genre);
-
-                    book.setAuthors(new ArrayList<>());
-                    bookMap.put(bookId, book);
-                }
-
-                // if book is already in map just add author
-                Author author = new Author();
-                author.setId(rs.getInt("author_id"));
-                author.setName(rs.getString("author_name"));
-                book.getAuthors().add(author);
-            }
-
-            return new ArrayList<>(bookMap.values());
-        });
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("SELECT DISTINCT b FROM Book b " +
+                        "LEFT JOIN FETCH b.authors " +
+                        "LEFT JOIN FETCH b.genre " +
+                        "ORDER BY b.id", Book.class)
+                .getResultList();
     }
 
+    public Optional<Book> findById(int id){
+        Session session = sessionFactory.getCurrentSession();
+        Book book = session.createQuery("SELECT DISTINCT b FROM Book b " +
+                "LEFT JOIN FETCH b.authors " +
+                "LEFT JOIN FETCH b.genre " +
+                "WHERE b.id = :id", Book.class)
+                .setParameter("id",id)
+                .uniqueResult();
+        return Optional.ofNullable((book));}
+
+
+
+
     public void update(Book book) {
-        String updateBookSql = """
-        UPDATE books
-        SET title = ?,
-            description = ?,
-            pages = ?,
-            rating = ?,
-            genre_id = (SELECT genre_id FROM genres WHERE name = ?)
-        WHERE book_id = ?
-    """;
+        Session session = sessionFactory.getCurrentSession();
+        session.merge(book);
 
-        int updatedRows = jdbcTemplate.update(updateBookSql,
-                book.getTitle(),
-                book.getDescription(),
-                book.getPages(),
-                book.getRating(),
-                book.getGenre().getName(),
-                book.getId());
-
-        if (updatedRows == 0) {
-            throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
-        }
-
-        // update ManyToMany relation book_authors (delete old records,add new)
-        String deleteAuthorsSql = "DELETE FROM book_authors WHERE book_id = ?";
-        jdbcTemplate.update(deleteAuthorsSql, book.getId());
-
-        String insertAuthorSql = """
-        INSERT INTO book_authors (book_id, author_id)
-        VALUES (?, (SELECT author_id FROM authors WHERE name = ?))
-    """;
-        for (Author author : book.getAuthors()) {
-            jdbcTemplate.update(insertAuthorSql, book.getId(), author.getName());
-        }
     }
 
     public void save(Book book){
-        // using returing to get book_id
-        String sql = """
-        INSERT INTO books (title, description, pages, rating, genre_id)
-        VALUES (?, ?, ?, ?, (SELECT genre_id FROM genres WHERE name = ?))
-        RETURNING book_id
-        """;
-
-        Integer bookId = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                book.getTitle(),
-                book.getDescription(),
-                book.getPages(),
-                book.getRating(),
-                book.getGenre().getName()
-        );
-
-        if (bookId == null) {
-            throw new IllegalStateException("Failed to insert book");
-        }
-
-        String insertAuthorSql = """
-        INSERT INTO book_authors (book_id, author_id)
-        VALUES (?, (SELECT author_id FROM authors WHERE name = ?))
-    """;
-        for (Author author : book.getAuthors()) {
-            jdbcTemplate.update(insertAuthorSql, bookId, author.getName());
-        }
-
-
+        Session session = sessionFactory.getCurrentSession();
+        session.persist(book);
     }
 
 
     public void deleteById(int id){
-        String sql = "DELETE FROM books WHERE book_id = ?";
-        int deletedRows = jdbcTemplate.update(sql,id);
-        if (deletedRows == 0){
+        Session session = sessionFactory.getCurrentSession();
+        Book book = session.get(Book.class,id);
+        if(book == null){
             throw new NoSuchElementException(messageService.getMessage("error.no.such.book"));
         }
+        session.remove(book);
     }
 
 
 
-    public List<Book> searchByKeyword(String keyword){
-        String sql = """
-        SELECT b.book_id, b.title, b.description, b.pages, b.rating,
-               a.author_id, a.name AS author_name,
-               g.genre_id, g.name AS genre_name
-        FROM books b
-        JOIN book_authors ba ON b.book_id = ba.book_id
-        JOIN authors a ON ba.author_id = a.author_id
-        JOIN genres g ON b.genre_id = g.genre_id
-        WHERE LOWER(b.title) LIKE LOWER(?) OR LOWER(b.description) LIKE LOWER(?)
-        ORDER BY b.book_id
-    """;
+//    public List<Book> searchByKeyword(String keyword){
+//        Session session = sessionFactory.getCurrentSession();
+//        String hql = "SELECT DISTINCT b FROM Book b " +
+//                "LEFT JOIN FETCH b.authors " +
+//                "LEFT JOIN FETCH b.genre " +
+//                "WHERE LOWER(b.title) LIKE LOWER(:keyword) OR LOWER(b.description) LIKE LOWER(:keyword) " +
+//                "ORDER BY b.id";
+//
+//        return session.createQuery(hql, Book.class)
+//                .setParameter("keyword", "%" + keyword.toLowerCase() + "%")
+//                .getResultList();
+//    }
 
-        String likePattern = "%" + keyword.toLowerCase() + "%";
+//    public List<Book> searchByKeyword(String keyword){
+//        Session session = sessionFactory.getCurrentSession();
+//        CriteriaBuilder cb = session.getCriteriaBuilder();
+//        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+//        Root<Book> book = cq.from(Book.class);
+//
+//        book.fetch("authors", JoinType.LEFT);
+//        book.fetch("genre", JoinType.LEFT);
+//
+//
+//        Predicate titlePredicate = cb.like(cb.lower(book.get("title")), "%" + keyword.toLowerCase() + "%");
+//        Predicate descPredicate = cb.like(cb.lower(book.get("description")), "%" + keyword.toLowerCase() + "%");
+//
+//        cq.where(cb.or(titlePredicate, descPredicate))
+//                .distinct(true)
+//                .orderBy(cb.asc(book.get("id")));
+//
+//        return session.createQuery(cq).getResultList();
+//    }
+//
+public List<Book> searchByKeyword(String keyword) {
+    Session session = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+    Root<Book> book = cq.from(Book.class);
 
+    book.fetch("authors", JoinType.LEFT);
+    book.fetch("genre", JoinType.LEFT);
 
-        return jdbcTemplate.query(sql, rs -> {
-            Map<Integer, Book> bookMap = new LinkedHashMap<>();
-            while (rs.next()) {
-                int bookId = rs.getInt("book_id");
-                Book book = bookMap.get(bookId);
+    Join<Book, Author> authors = book.join("authors", JoinType.LEFT);
+    Join<Book, Genre> genre = book.join("genre", JoinType.LEFT);
 
-                // if book is not in bookMap
-
-                if (book == null) {
-                    book = new Book();
-                    book.setId(bookId);
-                    book.setTitle(rs.getString("title"));
-                    book.setDescription(rs.getString("description"));
-                    book.setPages(rs.getInt("pages"));
-                    book.setRating(rs.getBigDecimal("rating"));
-
-                    Genre genre = new Genre();
-                    genre.setId(rs.getInt("genre_id"));
-                    genre.setName(rs.getString("genre_name"));
-                    book.setGenre(genre);
-
-                    book.setAuthors(new ArrayList<>());
-                    bookMap.put(bookId, book);
-                }
-
-                // if book is already in map just add author
-                Author author = new Author();
-                author.setId(rs.getInt("author_id"));
-                author.setName(rs.getString("author_name"));
-                book.getAuthors().add(author);
-            }
-
-            return new ArrayList<>(bookMap.values());
-        },likePattern,likePattern);
+    String likePattern = "%" + keyword.toLowerCase() + "%";
 
 
-    }
+    Predicate titlePredicate = cb.like(cb.lower(book.get("title")), likePattern);
+    Predicate descPredicate = cb.like(cb.lower(book.get("description")), likePattern);
+    Predicate authorPredicate = cb.like(cb.lower(authors.get("name")), likePattern);
+    Predicate genrePredicate = cb.like(cb.lower(genre.get("name")), likePattern);
+
+
+    cq.where(cb.or(titlePredicate, descPredicate, authorPredicate, genrePredicate))
+            .distinct(true)
+            .orderBy(cb.asc(book.get("id")));
+
+    return session.createQuery(cq).getResultList();
+}
+
+
+
 
 
 }

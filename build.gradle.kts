@@ -10,10 +10,16 @@ dependencies {
     implementation(libs.spring.context)
     implementation(libs.jackson.csv)
     implementation(libs.spring.aop)
+    implementation(libs.spring.orm)
     implementation(libs.spring.jdbc)
     implementation(libs.aspectj.weaver)
     implementation(libs.postgresql)
     implementation(libs.flyway.postgresql)
+
+    implementation(libs.hibernate.core)
+    implementation(libs.hibernate.jcache)
+    implementation(libs.ehcache)
+    implementation(libs.cache.api)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

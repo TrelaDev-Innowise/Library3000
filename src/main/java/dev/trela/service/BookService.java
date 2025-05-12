@@ -14,37 +14,44 @@ public class BookService {
 
 
     private final MessageService messageService;
-    private final BookRepository bookRepositoryDb;
+    private final BookRepository bookRepository;
 
 
 
     public BookService(MessageService messageService, BookRepository bookRepositoryDb){
         this.messageService = messageService;
-        this.bookRepositoryDb = bookRepositoryDb;
+        this.bookRepository = bookRepositoryDb;
 
     }
 
+    //@Transactional(readOnly = true)
     public List<Book> getAllBooks(){
-        return bookRepositoryDb.findAll();
+        return bookRepository.findAll();
     }
+
+    public Book getBookById(int id){
+        return bookRepository.findById(id).orElseThrow(()->
+                new NoSuchElementException(messageService.getMessage("error.no.such.book")));
+    }
+
 
     @Transactional
     public void addBook(Book book) throws IllegalArgumentException{
-        bookRepositoryDb.save(book);
+        bookRepository.save(book);
     }
 
     @Transactional
     public void updateBook(Book book) throws NoSuchElementException{
-        bookRepositoryDb.update(book);
+        bookRepository.update(book);
     }
 
     @Transactional
     public void deleteBook(int bookId) throws NoSuchElementException{
-       bookRepositoryDb.deleteById(bookId);
+       bookRepository.deleteById(bookId);
     }
 
     public List<Book> searchByKeyword(String keyword){
-        return bookRepositoryDb.searchByKeyword(keyword);
+        return bookRepository.searchByKeyword(keyword);
 
     }
 
@@ -83,6 +90,7 @@ public class BookService {
             throw new IllegalArgumentException(messageService.getMessage("error.rating.range"));
         }
     }
+
 
 
 
