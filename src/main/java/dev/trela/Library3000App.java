@@ -5,7 +5,6 @@ import dev.trela.config.LibraryConfig;
 import dev.trela.model.Author;
 import dev.trela.model.Book;
 import dev.trela.model.Genre;
-import dev.trela.repository.AuthorRepository;
 import dev.trela.service.AuthorService;
 import dev.trela.service.BookService;
 import dev.trela.service.GenreService;

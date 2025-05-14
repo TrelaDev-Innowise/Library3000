@@ -2,9 +2,7 @@ package dev.trela.service;
 import dev.trela.model.Genre;
 import dev.trela.repository.GenreRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -27,21 +25,6 @@ public class GenreService {
                         messageService.getMessage("error.genre.notfound")
                 ));
     }
-
-//    public List<Genre> getAllGenres(){
-//        return genreRepository.findAll();
-//    }
-//
-//    @Transactional
-//    public void updateGenre(Genre genre) throws NoSuchElementException{
-//        genreRepository.update(genre);
-//    }
-//
-//    @Transactional
-//    public void deleteGenre(int id) throws NoSuchElementException{
-//        genreRepository.deleteById(id);
-//    }
-
 
 
 

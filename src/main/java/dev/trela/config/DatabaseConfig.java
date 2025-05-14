@@ -1,11 +1,7 @@
 package dev.trela.config;
 
-import dev.trela.model.Author;
-import dev.trela.model.Book;
-import dev.trela.model.Genre;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -43,7 +39,7 @@ public class DatabaseConfig {
     public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource);
-        sessionFactory.setPackagesToScan("dev.trela.model"); // pakiet z encjami
+        sessionFactory.setPackagesToScan("dev.trela.model"); // entity package
         sessionFactory.setHibernateProperties(hibernateProperties());
         return sessionFactory;
     }
@@ -59,6 +55,8 @@ public class DatabaseConfig {
         properties.put("hibernate.cache.use_query_cache", "true");
         return properties;
     }
+
+
 
     @Bean
     public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {

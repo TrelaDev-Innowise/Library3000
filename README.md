@@ -1,48 +1,60 @@
+
+
 # 📚 Library3000App
 
-Library3000App is a console application for managing books, written in Java using Spring.  
-Book data is now stored in a PostgreSQL database via Docker and accessed using **Spring JDBC (JdbcTemplate)**.
+**Library3000App** is a console application for managing books, written in Java using **Spring** and **Hibernate**.
+Book data is stored in a **PostgreSQL** database running in **Docker**, and accessed using **Hibernate ORM** (replacing the previous Spring JDBC implementation).
+
+---
+
 ## ✨ Features
-✅ Display the list of books  
-✅ Add a new book  
-✅ Edit a book  
-✅ Delete a book  
-✅ Search books by keyword  
-✅ Multi-language support (English, Polish)  
-✅ Logging & caching via Spring AOP
+
+✅ Display the list of books
+✅ Add a new book
+✅ Edit a book
+✅ Delete a book
+✅ Search books by keyword using **Criteria API**
+✅ Multi-language support (English, Polish)
+✅ Logging and **three levels of caching** via Spring AOP and Hibernate
+
+---
 
 ## 🛠 Requirements
-🔹 Java 21 
-🔹 Gradle  
+
+🔹 Java 21
+🔹 Gradle
 🔹 Docker & Docker Compose
+
+---
 
 ## 🚀 Setup & Running
 
 ### 1️⃣ Start the Database
-Run the following command in the root of the project to start the PostgreSQL database using Docker Compose:
+
+Run the following command in the project root to start the PostgreSQL database with Docker Compose:
 
 ```sh
 docker-compose up -d
 ```
 
-This will start a PostgreSQL container with the database used by the application.
-
-
 ### 2️⃣ Build the Project
-Build the project and create a fat JAR:
+
+Use Gradle to build the project and generate a fat JAR:
 
 ```sh
 gradlew shadowJar
 ```
 
 ### 3️⃣ Run the Application
-Once the database is up and the JAR is built, run the application:
+
+Once the database is running and the JAR is built:
 
 ```sh
 java -jar build/libs/Library3000-1.0-SNAPSHOT.jar
 ```
 
-Flyway will automatically initialize the schema and insert sample data when the application starts.
+📌 **Flyway** will automatically set up the database schema and populate it with sample data.
+
 ---
 
 ## 📂 Project Structure
@@ -52,96 +64,110 @@ src/
 └── main/
     ├── java/
     │   └── testing/
-    │       ├── config/           # Spring configuration (DataSource, MessageSource, etc.)
+    │       ├── config/           # Hibernate & Spring configuration
     │       ├── model/            # Domain models: Book, Author, Genre
-    │       ├── repository/       # Repositories using JdbcTemplate
+    │       ├── repository/       # Hibernate-based repositories
     │       ├── service/          # Business logic layer
-    │       ├── util/             # Utility/helper classes (if any)
-    │       └── Library3000App.java  # Main application class (Spring Boot entry point)
+    │       ├── util/             # Utility/helper classes
+    │       └── Library3000App.java  # Main application class
     └── resources/
-        ├── migration/
-        │   ├── V1__create_tables.sql
-        │   └── V2__insert_initial_data.sql
+        ├── migration/            # Flyway SQL scripts
         ├── messages_en.properties
         └── messages_pl.properties
-
 ```
 
 ---
 
 ## 🗃 Database Structure
 
-Instead of a CSV file, the application now uses a PostgreSQL database with the following schema:
+The application uses a **PostgreSQL** database with the following schema:
 
-**Tables:**
+* `books`: `id`, `title`, `description`, `genre`, `rating`, `pages`
+* `authors`: `author_id`, `name`
+* `books_authors`: `book_id`, `author_id` (many-to-many relationship)
+* `genres`: `id`, `name`
 
-- `books`: `id`, `title`, `description`, `genre`, `rating`, `pages`
-- `authors`: `author_id`, `name`
-- `books_authors`: `book_id`, `author_id` (many-to-many relationship between books and authors)
-- `genres`: `id`, `name` (list of available book genres)
-
-The database schema is managed automatically by **Flyway**.
-
+Schema management is fully automated with **Flyway**.
 
 ---
 
-## 🎮 How to Use
+## 🔍 Search by Keyword (Hibernate Criteria API)
 
-After running the app, you will see a menu:
+The search functionality is implemented using Hibernate’s **Criteria API**, allowing advanced filtering across multiple related entities.
 
-```sql
-Choose an option:
-1 - Display book list
-2 - Create a new book
-3 - Edit a book
-4 - Delete a book
-5 - Search by keyword
-6 - Exit
-Your choice:
+```java
+public List<Book> searchByKeyword(String keyword) {
+    Session session = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+    Root<Book> book = cq.from(Book.class);
+
+    book.fetch("authors", JoinType.LEFT);
+    book.fetch("genre", JoinType.LEFT);
+
+    Join<Book, Author> authors = book.join("authors", JoinType.LEFT);
+    Join<Book, Genre> genre = book.join("genre", JoinType.LEFT);
+
+    String likePattern = "%" + keyword.toLowerCase() + "%";
+
+    Predicate titlePredicate = cb.like(cb.lower(book.get("title")), likePattern);
+    Predicate descPredicate = cb.like(cb.lower(book.get("description")), likePattern);
+    Predicate authorPredicate = cb.like(cb.lower(authors.get("name")), likePattern);
+    Predicate genrePredicate = cb.like(cb.lower(genre.get("name")), likePattern);
+
+    cq.where(cb.or(titlePredicate, descPredicate, authorPredicate, genrePredicate))
+      .distinct(true)
+      .orderBy(cb.asc(book.get("id")));
+
+    return session.createQuery(cq).getResultList();
+}
 ```
 
-🔹 Add a book with multiple authors  
-🔹 Search by keyword in title, description, or author name  
-🔹 Validation for fields like rating (0–5), genre, and pages
-
 ---
 
-# 🌍 Multi-Language Support
+## 🌍 Multi-Language Support
 
-The application supports multiple languages using `MessageSource`.
+The application supports both **English** and **Polish**, using Spring’s `MessageSource`.
+Language is selected at runtime:
 
-Language selection is prompted at runtime:
 ```text
 Select language: 1 for English, 2 for Polski
 ```
 
-Localized messages are loaded from:
-- `messages.properties` (English)
-- `messages_pl.properties` (Polish)
-
-You can easily add new languages by adding more properties files.
+You can add more languages by simply creating additional properties files.
 
 ---
 
-# 🛠 AOP Logging and Caching
+## 🧠 Caching and Logging with AOP
 
-Implemented using Spring AOP. The `LoggingAndCachingAspect` handles:
-- Logging method calls, returns, and execution time
-- Caching return values of service methods to optimize performance
+The application uses **Spring AOP** and **Hibernate caching** to improve performance and traceability.
+
+### ✅ Three types of caching are implemented:
+
+1. **First-Level Cache** – Hibernate session-level (automatic)
+2. **Second-Level Cache** – Entity-level caching (e.g. EHCache or similar)
+3. **Method-Level Cache** – via Spring AOP to cache expensive service method results
+
+Additionally, the `LoggingAndCachingAspect` logs:
+
+* Method calls
+* Return values
+* Execution time
 
 ---
 
 ## ⚙ Technologies Used
 
-🔹 **Java 17** – Core language  
-🔹 **Spring Context & AOP** – Configuration, dependency injection, and aspect logic  
-🔹 **Spring JDBC (JdbcTemplate)** – Type-safe, efficient database access  
-🔹 **JDBC (JdbcTemplate)** – Database access  
-🔹 **PostgreSQL** – Relational database (via Docker)  
-🔹 **Flyway** – Database schema migration  
-🔹 **Gradle + Shadow Plugin** – Building fat JAR  
-🔹 **Docker Compose** – Running PostgreSQL instance
-🔹 **Lombok** – Reduces boilerplate code (getters, setters, constructors, etc.)
+🔹 **Java 21**
+🔹 **Spring Context, AOP**
+🔹 **Hibernate ORM** (pure, no JdbcTemplate)
+🔹 **PostgreSQL** (via Docker)
+🔹 **Flyway**
+🔹 **Gradle + Shadow Plugin**
+🔹 **Docker Compose**
+🔹 **Lombok**
 
 ---
-📌 **Note**: Make sure Docker is running before launching the application.
+
+📌 Make sure Docker is running before launching the application.
+

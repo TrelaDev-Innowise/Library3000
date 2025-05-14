@@ -7,11 +7,9 @@ import dev.trela.service.MessageService;
 import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @Repository
@@ -46,8 +44,6 @@ public class BookRepository {
         return Optional.ofNullable((book));}
 
 
-
-
     public void update(Book book) {
         Session session = sessionFactory.getCurrentSession();
         session.merge(book);
@@ -71,39 +67,6 @@ public class BookRepository {
 
 
 
-//    public List<Book> searchByKeyword(String keyword){
-//        Session session = sessionFactory.getCurrentSession();
-//        String hql = "SELECT DISTINCT b FROM Book b " +
-//                "LEFT JOIN FETCH b.authors " +
-//                "LEFT JOIN FETCH b.genre " +
-//                "WHERE LOWER(b.title) LIKE LOWER(:keyword) OR LOWER(b.description) LIKE LOWER(:keyword) " +
-//                "ORDER BY b.id";
-//
-//        return session.createQuery(hql, Book.class)
-//                .setParameter("keyword", "%" + keyword.toLowerCase() + "%")
-//                .getResultList();
-//    }
-
-//    public List<Book> searchByKeyword(String keyword){
-//        Session session = sessionFactory.getCurrentSession();
-//        CriteriaBuilder cb = session.getCriteriaBuilder();
-//        CriteriaQuery<Book> cq = cb.createQuery(Book.class);
-//        Root<Book> book = cq.from(Book.class);
-//
-//        book.fetch("authors", JoinType.LEFT);
-//        book.fetch("genre", JoinType.LEFT);
-//
-//
-//        Predicate titlePredicate = cb.like(cb.lower(book.get("title")), "%" + keyword.toLowerCase() + "%");
-//        Predicate descPredicate = cb.like(cb.lower(book.get("description")), "%" + keyword.toLowerCase() + "%");
-//
-//        cq.where(cb.or(titlePredicate, descPredicate))
-//                .distinct(true)
-//                .orderBy(cb.asc(book.get("id")));
-//
-//        return session.createQuery(cq).getResultList();
-//    }
-//
 public List<Book> searchByKeyword(String keyword) {
     Session session = sessionFactory.getCurrentSession();
     CriteriaBuilder cb = session.getCriteriaBuilder();
