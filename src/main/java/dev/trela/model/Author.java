@@ -11,7 +11,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Cacheable()
+@Cacheable
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class Author {
     @Id
