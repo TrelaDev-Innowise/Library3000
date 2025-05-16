@@ -1,144 +1,173 @@
+
+
 # 📚 Library3000App
 
-Library3000App is a simple console application for managing books, written in Java using Spring. Book data is stored in a CSV file.
+**Library3000App** is a console application for managing books, written in Java using **Spring** and **Hibernate**.
+Book data is stored in a **PostgreSQL** database running in **Docker**, and accessed using **Hibernate ORM** (replacing the previous Spring JDBC implementation).
 
-## ✨ Features  
-✅ Display the list of books  
-✅ Add a new book  
-✅ Edit a book  
-✅ Delete a book  
-✅ Search books by keyword  
+---
 
-## 🛠 Requirements  
-🔹 Java 17+  
-🔹 Gradle  
+## ✨ Features
 
-## 🚀 Installation & Running  
+✅ Display the list of books
+✅ Add a new book
+✅ Edit a book
+✅ Delete a book
+✅ Search books by keyword using **Criteria API**
+✅ Multi-language support (English, Polish)
+✅ Logging and **three levels of caching** via Spring AOP and Hibernate
 
-### 1️⃣ Open the Project  
-You can open the project in an IDE (like IntelliJ IDEA or Eclipse). The testing  `books.csv` file is located in the `src/main/resources` folder. Also there is `books_backup.csv` there for more convinient testing
+---
 
-Alternatively, you can build the project and run the fat JAR. In that case, the `books.csv` file will be created automatically in the folder where the JAR is executed.  
+## 🛠 Requirements
 
-### 2️⃣ Build the project  
-First, compile the project and generate a fat JAR (with all dependencies):  
+🔹 Java 21
+🔹 Gradle
+🔹 Docker & Docker Compose
+
+---
+
+## 🚀 Setup & Running
+
+### 1️⃣ Start the Database
+
+Run the following command in the project root to start the PostgreSQL database with Docker Compose:
+
+```sh
+docker-compose up -d
+```
+
+### 2️⃣ Build the Project
+
+Use Gradle to build the project and generate a fat JAR:
 
 ```sh
 gradlew shadowJar
 ```
 
-### 3️⃣ Run the application  
-After building the project, run the application in the console:  
+### 3️⃣ Run the Application
+
+Once the database is running and the JAR is built:
 
 ```sh
 java -jar build/libs/Library3000-1.0-SNAPSHOT.jar
 ```
 
-📌 **Note:** If the `books.csv` file does not exist, the application will automatically create it in the `src/main/resources` folder with some sample books.  
+📌 **Flyway** will automatically set up the database schema and populate it with sample data.
 
 ---
 
-## 📂 Project Structure  
+## 📂 Project Structure
 
-```bash
+```
 src/
- ├── main/
- │   ├── java/dev/trela/testing/
- │   │   ├── config/       # Spring configuration
- │   │   ├── model/        # Book class (data model)
- │   │   ├── repository/   # CSV file operations
- │   │   ├── service/      # Business logic
- │   │   ├── Library3000App.java # Main application class
- │   ├── resources/        # books.csv file (CSV database)
- ├── test/                 # Unit & integration tests
- ├── build/                # Output folder after building the application
+└── main/
+    ├── java/
+    │   └── testing/
+    │       ├── config/           # Hibernate & Spring configuration
+    │       ├── model/            # Domain models: Book, Author, Genre
+    │       ├── repository/       # Hibernate-based repositories
+    │       ├── service/          # Business logic layer
+    │       ├── util/             # Utility/helper classes
+    │       └── Library3000App.java  # Main application class
+    └── resources/
+        ├── migration/            # Flyway SQL scripts
+        ├── messages_en.properties
+        └── messages_pl.properties
 ```
 
 ---
 
-## 📂 CSV File Format  
-The `books.csv` file follows this format:  
+## 🗃 Database Structure
 
-```bash
-id,title,author,description
-1,Hobbit,"J.R.R. Tolkien","Fantasy novel about Bilbo Baggins"
-2,1984,"George Orwell","Dystopian fiction about a totalitarian regime"
-3,Dziady,"Adam Mickiewicz","Polish dramatic poem about spirits and the afterlife"
-...
+The application uses a **PostgreSQL** database with the following schema:
+
+* `books`: `id`, `title`, `description`, `genre`, `rating`, `pages`
+* `authors`: `author_id`, `name`
+* `books_authors`: `book_id`, `author_id` (many-to-many relationship)
+* `genres`: `id`, `name`
+
+Schema management is fully automated with **Flyway**.
+
+---
+
+## 🔍 Search by Keyword (Hibernate Criteria API)
+
+The search functionality is implemented using Hibernate’s **Criteria API**, allowing advanced filtering across multiple related entities.
+
+```java
+public List<Book> searchByKeyword(String keyword) {
+    Session session = sessionFactory.getCurrentSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery<Book> cq = cb.createQuery(Book.class);
+    Root<Book> book = cq.from(Book.class);
+
+    book.fetch("authors", JoinType.LEFT);
+    book.fetch("genre", JoinType.LEFT);
+
+    Join<Book, Author> authors = book.join("authors", JoinType.LEFT);
+    Join<Book, Genre> genre = book.join("genre", JoinType.LEFT);
+
+    String likePattern = "%" + keyword.toLowerCase() + "%";
+
+    Predicate titlePredicate = cb.like(cb.lower(book.get("title")), likePattern);
+    Predicate descPredicate = cb.like(cb.lower(book.get("description")), likePattern);
+    Predicate authorPredicate = cb.like(cb.lower(authors.get("name")), likePattern);
+    Predicate genrePredicate = cb.like(cb.lower(genre.get("name")), likePattern);
+
+    cq.where(cb.or(titlePredicate, descPredicate, authorPredicate, genrePredicate))
+      .distinct(true)
+      .orderBy(cb.asc(book.get("id")));
+
+    return session.createQuery(cq).getResultList();
+}
 ```
 
 ---
 
-## 🎮 How to Use?  
-After running the application, you will see the following menu:  
+## 🌍 Multi-Language Support
 
-```sql
-Choose an option:
-1 - Display book list
-2 - Create a new book
-3 - Edit a book
-4 - Delete a book
-5 - Search by keyword
-6 - Exit
-Your choice:
+The application supports both **English** and **Polish**, using Spring’s `MessageSource`.
+Language is selected at runtime:
+
+```text
+Select language: 1 for English, 2 for Polski
 ```
 
-🔹 **Search Feature:** Enter a keyword, and the program will display books whose title, author, or description contains the keyword.  
+You can add more languages by simply creating additional properties files.
 
 ---
 
-# 🌍 Multi-Language Support
+## 🧠 Caching and Logging with AOP
 
-The application supports multiple languages, allowing users to switch between different languages (such as English and Polish) for all messages in the app. To switch languages, the system uses the Spring `MessageSource` service, which loads messages from properties files (such as `messages_en.properties` and `messages_pl.properties`).
+The application uses **Spring AOP** and **Hibernate caching** to improve performance and traceability.
 
-## Example Messages in English:
-- `"logging.calling"` - "Calling method {0} with parameters {1}"
-- `"logging.cached.result"` - "Returning cached result for method {0} with parameters {1}"
+### ✅ Three types of caching are implemented:
 
-## Example Messages in Polish:
-- `"logging.calling"` - "Wywołanie metody {0} z parametrami {1}"
-- `"logging.cached.result"` - "Zwracanie wyników z pamięci podręcznej dla metody {0} z parametrami {1}"
+1. **First-Level Cache** – Hibernate session-level (automatic)
+2. **Second-Level Cache** – Entity-level caching (e.g. EHCache or similar)
+3. **Method-Level Cache** – via Spring AOP to cache expensive service method results
 
-To switch the language in the application, the `MessageService` class allows you to set the current locale via the `setLocale(Locale locale)` method.
+Additionally, the `LoggingAndCachingAspect` logs:
 
----
-# 🛠 AOP Logging and Caching
-
-This application also uses Aspect-Oriented Programming (AOP) to log method calls and cache method results to optimize performance. The `LoggingAndCachingAspect` class intercepts calls to service methods (excluding `MessageService`) and does the following:
-
-## 📜 What the Aspect Does:
-- Logs method calls and their parameters.
-- Checks the cache for the results of methods that have arguments and return values.
-- If a cached result is available, it is returned instead of re-executing the method.
-- Caches results when a method executes and has a non-null return value.
-
-## Example Log Output:
-- `"logging.calling"`: Logs when a method is called, including its parameters.
-- `"logging.returned"`: Logs when a method returns, including the returned value and the duration of the execution.
-- `"logging.caching.result"`: Logs when a result is cached for later use.
+* Method calls
+* Return values
+* Execution time
 
 ---
 
+## ⚙ Technologies Used
 
-## 🧪 Testing  
-
-The project includes **unit tests** and **integration tests**:  
-
-✅ **Unit tests** verify individual components like repository and service logic.  
-✅ **Integration tests** ensure the system works as expected when interacting with the CSV file.  
-
-Run tests with:  
-
-```sh
-gradlew test
-```
+🔹 **Java 21**
+🔹 **Spring Context, AOP**
+🔹 **Hibernate ORM** (pure, no JdbcTemplate)
+🔹 **PostgreSQL** (via Docker)
+🔹 **Flyway**
+🔹 **Gradle + Shadow Plugin**
+🔹 **Docker Compose**
+🔹 **Lombok**
 
 ---
 
-## ⚙ Technologies Used  
+📌 Make sure Docker is running before launching the application.
 
-🔹 **Java 17** – Programming language  
-🔹 **Spring Context** – Component management and IoC  
-🔹 **Jackson CSV** – Handling CSV files  
-🔹 **JUnit 5** – Unit & integration testing  
-🔹 **Gradle (Shadow Plugin)** – Creating a **fat JAR**  
