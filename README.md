@@ -1,6 +1,4 @@
-Sure! Here's the revised `README.md` reflecting the switch from **Flyway** to **Liquibase**, and removing the multi-language support section since everything is currently in English:
 
----
 
 # 📚 Library3000App
 
