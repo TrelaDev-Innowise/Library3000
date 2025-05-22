@@ -63,13 +63,6 @@ java -jar Library3000App-1.0-SNAPSHOT.jar
 
 ---
 
-Let me know if you'd like me to apply this change to the full `README.md` or generate a ready-to-save Markdown file.
-
-
-📌 **Liquibase** will automatically initialize the database schema and insert sample data.
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -200,3 +193,5 @@ DELETE http://localhost:8080/api/books/1
 ---
 
 📌 Make sure Docker is running before starting the application. All API endpoints can be tested using the Postman collection located in the `Postman/` directory.
+
+🗂️ The collection of requests is included in the Postman/ folder — import it into Postman to quickly access and test all endpoints.
