@@ -47,11 +47,24 @@ Use Gradle to build the application:
 
 ### 3️⃣ Run the Application
 
-After building:
+After building the project, navigate to the output directory:
 
 ```sh
-java -jar build/libs/Library3000App-1.0-SNAPSHOT.jar
+cd build/libs
 ```
+
+Then run the application:
+
+```sh
+java -jar Library3000App-1.0-SNAPSHOT.jar
+```
+
+📌 **Liquibase** will automatically initialize the database schema and insert sample data.
+
+---
+
+Let me know if you'd like me to apply this change to the full `README.md` or generate a ready-to-save Markdown file.
+
 
 📌 **Liquibase** will automatically initialize the database schema and insert sample data.
 
