@@ -10,23 +10,21 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "books")
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@Cacheable
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NoArgsConstructor
+@Table(name = "books")
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_id")
-    private int id;
+    private Integer id;
     private String title;
     private String description;
     private int pages;
     private BigDecimal rating;
-    @ManyToMany(cascade = {CascadeType.MERGE})
+
+    @ManyToMany
     @JoinTable(
             name = "book_authors",
             joinColumns = @JoinColumn(name = "book_id"),

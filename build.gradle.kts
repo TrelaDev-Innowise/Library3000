@@ -1,9 +1,18 @@
 plugins {
     id("java")
     alias(libs.plugins.shadow)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 dependencies {
+
+    implementation(libs.spring.boot.web)
+    implementation(libs.spring.boot.jpa)
+    implementation(libs.spring.boot.validation)
+
+    implementation(libs.liquibase.core)
+
     testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(libs.h2)
@@ -14,7 +23,6 @@ dependencies {
     implementation(libs.spring.jdbc)
     implementation(libs.aspectj.weaver)
     implementation(libs.postgresql)
-    implementation(libs.flyway.postgresql)
 
     implementation(libs.hibernate.core)
     implementation(libs.hibernate.jcache)

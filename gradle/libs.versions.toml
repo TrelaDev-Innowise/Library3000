@@ -11,7 +11,9 @@ h2 = "2.2.224"
 hibernate = "6.6.13.Final"
 ehcache = "3.10.8"
 cache-api = "1.1.1"
-
+spring-boot = "3.4.5"
+spring-dependency-management = "1.1.4"
+liquibase = "4.27.0"
 
 
 [libraries]
@@ -30,12 +32,15 @@ hibernate-core = { module = "org.hibernate:hibernate-core", version.ref = "hiber
 hibernate-jcache = { module = "org.hibernate:hibernate-jcache", version.ref = "hibernate" }
 ehcache = { module = "org.ehcache:ehcache", version.ref = "ehcache" }
 cache-api = { module = "javax.cache:cache-api", version.ref = "cache-api" }
-
-
-
+spring-boot-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring-boot" }
+spring-boot-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
 
 
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 
 [plugins]
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow-plugin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }

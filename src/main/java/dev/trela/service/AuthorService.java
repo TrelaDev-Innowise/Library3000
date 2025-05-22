@@ -2,9 +2,8 @@ package dev.trela.service;
 
 import dev.trela.model.Author;
 
-import dev.trela.repository.AuthorRepository;
 
-import org.hibernate.Session;
+import dev.trela.repository.AuthorRepositoryJPA;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,31 +14,30 @@ import java.util.Optional;
 @Transactional
 public class AuthorService {
 
-    private final AuthorRepository authorRepository;
+
     private final SessionFactory sessionFactory;
+    private final AuthorRepositoryJPA authorRepositoryJPA;
+    private final MessageService messageService;
 
-    public AuthorService(AuthorRepository authorRepository, SessionFactory sessionFactory){
+    public AuthorService(SessionFactory sessionFactory, AuthorRepositoryJPA authorRepositoryJPA, MessageService messageService){
         this.sessionFactory = sessionFactory;
-        this.authorRepository = authorRepository;
+        this.authorRepositoryJPA = authorRepositoryJPA;
+        this.messageService = messageService;
     }
 
 
-    public Optional<Author> findAuthorByName(String authorName){
-        return authorRepository.findByName(authorName);
+    public Optional<Author> findAuthorByName(String authorName) {
+        return authorRepositoryJPA.findByName(authorName);
+
     }
 
-
-    public Author findOrCreateAuthor(String authorName)
-    {
-        Session session = sessionFactory.getCurrentSession();
-        Optional<Author> optionalAuthor = findAuthorByName(authorName);
-        if(optionalAuthor.isPresent()){
-            return session.merge(optionalAuthor.get());
-        }
-        Author newAuthor = new Author(authorName);
-        session.persist(newAuthor);
-        return newAuthor;
-
+    public Author addAuthorIfNotExists(String authorName) {
+        return authorRepositoryJPA.findByName(authorName)
+                .orElseGet(() -> {
+                    Author newAuthor = new Author();
+                    newAuthor.setName(authorName);
+                    return authorRepositoryJPA.save(newAuthor);
+                });
     }
 
 
